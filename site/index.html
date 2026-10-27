@@ -399,7 +399,10 @@ function marcarErros() {
 async function enviar(dados) {
   if (!API_URL) { await new Promise(r => setTimeout(r, 900)); return { ok: true, demo: true }; }
   const r = await fetch(API_URL + "/cadastro", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) });
-  return r.json();
+  let j = null;
+  try { j = await r.json(); } catch (e) {}
+  if (!j) throw new Error("O formulário está sem conexão com a planilha de cadastros. Avise a administração.");
+  return j;
 }
 
 form.addEventListener("submit", async e => {
