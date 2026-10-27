@@ -1,6 +1,6 @@
 /**
  * NETWORKING DA DIREITA: recebe os cadastros do site, grava nesta planilha
- * e entrega ao site a lista pública de profissionais.
+ * e entrega a lista de profissionais só para quem já se cadastrou.
  *
  * 1. Cole este código em Extensões → Apps Script (na planilha) e salve.
  * 2. Rode a função setup uma vez (cria a aba CADASTROS formatada).
@@ -8,8 +8,8 @@
  *    Executar como: Eu | Quem pode acessar: Qualquer pessoa
  * 4. Copie a URL (termina em /exec) e cole em site/config.js
  *
- * Ao atualizar este código: Implantar → Gerenciar implantações → lápis →
- * Versão: Nova versão → Implantar (a URL continua a mesma).
+ * Depois de mudar o código: Implantar → Gerenciar implantações → lápis →
+ * Versão: Nova versão → Implantar. A URL continua a mesma.
  */
 
 const CONFIG = {
@@ -62,6 +62,7 @@ function setup() {
   ]);
   if (!sh.getFilter()) sh.getRange(1, 1, sh.getMaxRows(), CABECALHO.length).createFilter();
 
+  segredo_();
   const vazia = ss.getSheetByName('Página1') || ss.getSheetByName('Sheet1');
   if (vazia && vazia.getLastRow() === 0) ss.deleteSheet(vazia);
   ss.toast('Aba CADASTROS pronta. Agora implante como App da Web.', 'Networking da Direita', 10);
@@ -69,17 +70,29 @@ function setup() {
 
 /* ---------- API usada pelo site ---------- */
 
-// Lista pública de profissionais (só dados comerciais autorizados).
-function doGet() {
-  return json_({ ok: true, mensagem: 'Formulário do Networking da Direita ativo.', profissionais: listar_() });
+// ?acao=lista&ig=...&chave=... devolve os profissionais para quem tem cadastro.
+// Sem chave válida, devolve só quantos profissionais existem (a lista fica bloqueada).
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  if (p.acao !== 'lista') return json_({ ok: true, mensagem: 'Formulário do Networking da Direita ativo.' });
+  try {
+    const dados = dados_();
+    const ig = usuario_(p.ig);
+    const liberado = ig && p.chave === chave_(ig) && dados.membros.indexOf(ig) >= 0;
+    if (!liberado) return json_({ ok: true, bloqueado: true, total: dados.lista.length });
+    return json_({ ok: true, profissionais: dados.lista });
+  } catch (err) {
+    return json_({ ok: false, erro: String(err && err.message || err) });
+  }
 }
 
 function doPost(e) {
   try {
     const d = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (d.website) return json_({ ok: true }); // campo invisível: só robôs preenchem
+    if (d.tipo === 'acesso') return json_(liberarAcesso_(d));
     const r = salvar_(d);
-    return json_({ ok: true, id: r.id, publicado: !!r.perfil, perfil: r.perfil });
+    return json_({ ok: true, id: r.id, publicado: !!r.perfil, perfil: r.perfil, instagram: r.instagram, chave: chave_(r.instagram) });
   } catch (err) {
     return json_({ ok: false, erro: String(err && err.message || err) });
   }
@@ -87,18 +100,51 @@ function doPost(e) {
 
 // Qualquer edição na planilha (ex.: mudar Status) atualiza a lista do site em segundos.
 function onEdit() {
-  CacheService.getScriptCache().remove('lista');
+  CacheService.getScriptCache().remove('dados');
+}
+
+/* ---------- Acesso à lista ---------- */
+
+// Quem já se cadastrou (em outro aparelho, por exemplo) libera a lista informando o Instagram.
+function liberarAcesso_(d) {
+  const ig = usuario_(d.instagram);
+  if (!ig || dados_().membros.indexOf(ig) < 0) {
+    return { ok: false, erro: 'Não encontramos esse Instagram no guia. Faça seu cadastro no formulário acima.' };
+  }
+  return { ok: true, instagram: ig, chave: chave_(ig) };
+}
+
+function chave_(ig) {
+  const assinatura = Utilities.computeHmacSha256Signature(ig, segredo_());
+  return Utilities.base64EncodeWebSafe(assinatura).replace(/=+$/, '');
+}
+
+function segredo_() {
+  const props = PropertiesService.getScriptProperties();
+  let s = props.getProperty('SEGREDO');
+  if (!s) {
+    s = Utilities.getUuid() + Utilities.getUuid();
+    props.setProperty('SEGREDO', s);
+  }
+  return s;
 }
 
 /* ---------- Leitura ---------- */
 
-function listar_() {
+// lista: cartões públicos | membros: Instagrams com cadastro ativo (liberam a lista)
+function dados_() {
   const cache = CacheService.getScriptCache();
-  const guardado = cache.get('lista');
+  const guardado = cache.get('dados');
   if (guardado) return JSON.parse(guardado);
-  const lista = linhas_().map(publico_).filter(Boolean);
-  try { cache.put('lista', JSON.stringify(lista), CONFIG.CACHE_SEGUNDOS); } catch (e) { /* lista grande demais para o cache */ }
-  return lista;
+  const linhas = linhas_();
+  const dados = {
+    lista: linhas.map(publico_).filter(Boolean),
+    membros: linhas
+      .filter(r => ['Recusado', 'Inativo'].indexOf(String(r['Status']).trim()) < 0)
+      .map(r => usuario_(r['Instagram'])).filter(Boolean)
+  };
+  try { cache.put('dados', JSON.stringify(dados), CONFIG.CACHE_SEGUNDOS); } catch (e) { /* grande demais para o cache */ }
+  return dados;
 }
 
 function linhas_() {
@@ -164,7 +210,7 @@ function salvar_(d) {
     sh.appendRow(CABECALHO.map(h => v[h]));
     sh.getRange(sh.getLastRow(), CABECALHO.indexOf('Link do Instagram') + 1)
       .setRichTextValue(SpreadsheetApp.newRichTextValue().setText(link).setLinkUrl(link).build());
-    CacheService.getScriptCache().remove('lista');
+    CacheService.getScriptCache().remove('dados');
 
     if (CONFIG.EMAIL_AVISO) {
       try {
@@ -176,7 +222,7 @@ function salvar_(d) {
     const linha = {};
     Object.keys(v).forEach(k => { linha[k] = typeof v[k] === 'string' ? v[k].replace(/^'/, '') : v[k]; });
     linha['WhatsApp comercial'] = whats;
-    return { id: id, perfil: publico_(linha) };
+    return { id: id, instagram: usuario, perfil: publico_(linha) };
   } finally {
     lock.releaseLock();
   }

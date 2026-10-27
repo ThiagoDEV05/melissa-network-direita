@@ -9,16 +9,21 @@ Nada sai deste computador.
 Uso:  python3 servidor.py            (computador + celulares no mesmo Wi-Fi)
       python3 servidor.py --so-local (só neste computador)
 """
+import base64
 import csv
+import hashlib
+import hmac
 import json
 import os
 import re
 import socket
 import sys
 import threading
+import secrets
 import webbrowser
 from datetime import datetime
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlparse
 
 try:
     from openpyxl import Workbook, load_workbook
@@ -220,8 +225,34 @@ def publico(r):
 
 
 def listar():
+    """Cartões públicos e Instagrams com cadastro ativo (que liberam a lista)."""
     with trava:
-        return [p for p in map(publico, ler_registros()) if p]
+        regs = ler_registros()
+    membros = {str(r.get("Instagram") or "").strip().lstrip("@").lower() for r in regs
+               if str(r.get("Status") or "").strip() not in ("Recusado", "Inativo")}
+    return [p for p in map(publico, regs) if p], membros
+
+
+def segredo():
+    caminho = os.path.join(DADOS, ".segredo")
+    if not os.path.exists(caminho):
+        os.makedirs(DADOS, exist_ok=True)
+        with open(caminho, "w") as f:
+            f.write(secrets.token_hex(32))
+    return open(caminho).read().strip().encode()
+
+
+def chave(usuario):
+    """Chave de acesso à lista, entregue a quem se cadastra (assinada com o segredo local)."""
+    assinatura = hmac.new(segredo(), usuario.encode(), hashlib.sha256).digest()
+    return base64.urlsafe_b64encode(assinatura).decode().rstrip("=")
+
+
+def liberar_acesso(d):
+    usuario = re.sub(r"[^a-z0-9._]", "", str(d.get("instagram") or "").strip().lower().lstrip("@"))[:30]
+    if not usuario or usuario not in listar()[1]:
+        raise ValueError("Não encontramos esse Instagram no guia. Faça seu cadastro no formulário acima.")
+    return {"instagram": usuario, "chave": chave(usuario)}
 
 
 def salvar_cadastro(d):
@@ -252,7 +283,9 @@ def salvar_cadastro(d):
             print(f"  ! {reg['ID']} salvo só no backup CSV: a planilha parece aberta ou travada ({e}). "
                   "Feche a planilha; o próximo envio grava os pendentes.")
     perfil = publico(reg)
-    return {"id": reg["ID"], "publicado": perfil is not None, "perfil": perfil}
+    usuario = campos["Instagram"].lstrip("@")
+    return {"id": reg["ID"], "publicado": perfil is not None, "perfil": perfil,
+            "instagram": usuario, "chave": chave(usuario)}
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -276,9 +309,16 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(corpo)
 
     def do_GET(self):
-        if self.path.split("?")[0] == "/api/profissionais":
+        url = urlparse(self.path)
+        if url.path == "/api/profissionais":
             try:
-                return self.json(200, {"ok": True, "profissionais": listar()})
+                lista, membros = listar()
+                q = parse_qs(url.query)
+                usuario = (q.get("ig") or [""])[0].strip().lower()
+                ok = usuario in membros and hmac.compare_digest((q.get("chave") or [""])[0], chave(usuario))
+                if not ok:  # sem cadastro: só o total, a lista fica bloqueada
+                    return self.json(200, {"ok": True, "bloqueado": True, "total": len(lista)})
+                return self.json(200, {"ok": True, "profissionais": lista})
             except Exception as e:
                 print("  ! não consegui ler a planilha:", e)
                 return self.json(500, {"ok": False, "erro": "Não foi possível ler a planilha."})
@@ -296,6 +336,8 @@ class Handler(SimpleHTTPRequestHandler):
                 raise ValueError("Formato inválido.")
             if d.get("website"):  # campo invisível: só robôs preenchem
                 return self.json(200, {"ok": True})
+            if d.get("tipo") == "acesso":
+                return self.json(200, {"ok": True, **liberar_acesso(d)})
             return self.json(200, {"ok": True, **salvar_cadastro(d)})
         except ValueError as e:
             return self.json(400, {"ok": False, "erro": str(e)})

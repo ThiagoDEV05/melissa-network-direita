@@ -226,6 +226,28 @@ textarea { min-height: 104px; resize: vertical; line-height: 1.45; }
 .bt-wa:hover { background: rgba(247,203,60,.14); }
 .bt[aria-disabled="true"] { opacity: .5; cursor: default; }
 
+/* Lista bloqueada até a pessoa se cadastrar */
+.trava { display: grid; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); }
+.trava > * { grid-area: 1 / 1; }
+.trava-fundo { display: grid; gap: 12px; padding: 16px; filter: blur(6px); opacity: .8; pointer-events: none; user-select: none; }
+@media (min-width: 680px) { .trava-fundo { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 679px) { .trava-fundo .fake:nth-child(3) { display: none; } }
+.fake { display: grid; align-content: start; gap: 10px; height: 210px; padding: 16px; border-radius: 16px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)); }
+.fake i { display: block; height: 10px; border-radius: 6px; background: rgba(255,255,255,.14); }
+.fake i:nth-child(1) { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, var(--green-2), var(--blue)); }
+.fake i:nth-child(2) { width: 70%; }
+.fake i:nth-child(3) { width: 45%; }
+.fake i:nth-child(4) { width: 90%; }
+.fake i:nth-child(5) { height: 42px; margin-top: 8px; border-radius: 12px; background: rgba(24,181,102,.45); }
+.trava-box { position: relative; z-index: 1; display: grid; justify-items: center; align-content: center; gap: 12px; padding: 32px 18px; text-align: center; background: radial-gradient(ellipse at center, rgba(3,17,11,.8) 30%, rgba(3,17,11,.35)); }
+.cadeado { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; border: 1px solid rgba(247,203,60,.45); background: rgba(247,203,60,.12); color: var(--gold); }
+.cadeado svg { width: 26px; height: 26px; }
+.trava-box h3 { margin: 0; font-family: var(--f-display); font-stretch: 112%; font-weight: 800; font-size: 1.35rem; line-height: 1.2; text-wrap: balance; }
+.trava-box p { margin: 0; max-width: 44ch; color: #CFE0D6; }
+.trava-box p b { color: var(--gold); }
+.trava-box > .send { width: min(100%, 320px); }
+.acesso { display: grid; gap: 8px; width: min(100%, 320px); }
+
 details.regras { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; font-size: 0.86rem; color: var(--muted); }
 details.regras summary { cursor: pointer; font-weight: 600; color: var(--fg); list-style: none; display: flex; align-items: center; gap: 8px; }
 details.regras summary::-webkit-details-marker { display: none; }
@@ -255,13 +277,14 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
       <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Gratuito</li>
       <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Leva 2 minutos</li>
       <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Seu Instagram no guia</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Libera a lista de profissionais</li>
     </ul>
   </section>
 
   <section class="card" aria-labelledby="tForm">
     <div class="card-in" id="painel">
       <h2 id="tForm">Cadastre seu negócio</h2>
-      <p class="lead">Preencha seus dados comerciais. Seu perfil entra na lista de profissionais da comunidade, logo abaixo.</p>
+      <p class="lead">Cadastre-se para entrar no guia e liberar a lista de profissionais da comunidade, logo abaixo.</p>
 
       <div class="prog" aria-hidden="true">
         <div class="prog-top"><span>Seu cadastro</span><b id="pct">0%</b></div>
@@ -328,11 +351,11 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
 
   <section class="dir" id="profissionais" aria-labelledby="tDir">
     <div class="dir-head">
-      <span class="tag"><span class="pulse"></span>Atualizado automaticamente</span>
+      <span class="tag"><span class="pulse"></span><span id="tagDir">Exclusivo para membros</span></span>
       <h2 id="tDir">Profissionais da <span>nossa comunidade</span></h2>
       <p>Encontre quem faz parte da rede, siga no Instagram e entre em contato.</p>
     </div>
-    <div class="busca" role="search">
+    <div class="busca" role="search" id="buscaBox" hidden>
       <label class="campo-busca" for="q">
         <span class="sr">Pesquisar profissional</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -341,7 +364,7 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
       <select id="fCat" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option></select>
       <select id="fCid" aria-label="Filtrar por cidade"><option value="">Todas as cidades</option></select>
     </div>
-    <div class="res-info"><span id="resInfo" aria-live="polite"></span><button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button></div>
+    <div class="res-info" id="resBar"><span id="resInfo" aria-live="polite"></span><button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button></div>
     <div id="grupos" class="grupos"></div>
   </section>
 </main>
@@ -512,17 +535,26 @@ form.addEventListener("submit", async e => {
   try {
     const r = await enviar(dados);
     if (!r.ok) throw new Error(r.erro || "Falha no envio");
-    concluido(r, dados);
+    await concluido(r, dados);
   } catch (err) {
     erro.textContent = err.message && err.message !== "Failed to fetch" ? err.message : "Não foi possível enviar. Verifique a conexão e tente de novo.";
+    if (/já está cadastrado/.test(err.message || "") && dir.bloqueado) {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "limpar"; b.textContent = " Liberar meu acesso à lista";
+      b.onclick = () => liberar(dados.instagram, erro, b);
+      erro.append(b);
+    }
   } finally {
     enviando = false;
     btn.disabled = false; btn.innerHTML = html;
   }
 });
 
-function concluido(r, dados) {
+async function concluido(r, dados) {
   let perfil = r.perfil || null;
+  const liberou = dir.bloqueado;
+  salvarAcesso({ instagram: r.instagram || igUsuario(dados.instagram), chave: r.chave || "demo" });
+  if (liberou) { dir.carregado = false; await atualizarLista(); }
   if (!perfil && r.demo) {
     perfil = { id: "DEMO-" + Date.now(), nome: dados.nome, empresa: dados.empresa, profissao: dados.profissao,
       especialidade: dados.especialidade, categoria: dados.categoria, cidade: dados.cidade,
@@ -539,12 +571,13 @@ function concluido(r, dados) {
   msg.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="c" cx="50" cy="50" r="44"/><path class="t" d="M30 52 45 66 71 38"/></svg>
     <div><b>${publicado ? "Cadastro publicado!" : "Cadastro recebido!"}</b>
     ${publicado ? `Seu perfil já aparece em <strong>${esc(perfil.categoria)}</strong>, na lista de profissionais abaixo.` : "Seu perfil aparece na lista depois da aprovação da administração."}
+    ${liberou && !dir.bloqueado ? " A lista de profissionais foi liberada para você." : ""}
     ${r.demo ? "<small>Modo demonstração: nada foi gravado.</small>" : ""}
     ${publicado ? '<br><button type="button" id="verPerfil">Ver meu perfil ↓</button>' : ""}</div>`;
   msg.hidden = false;
 
-  if (publicado) {
-    dir.locais = dir.locais.filter(x => x.p.id !== perfil.id).concat({ p: perfil, t: Date.now() });
+  if (publicado && !dir.bloqueado) {
+    dir.locais =dir.locais.filter(x => x.p.id !== perfil.id).concat({ p: perfil, t: Date.now() });
     dir.lista = dir.lista.filter(p => p.id !== perfil.id).concat(perfil);
     dir.q = dir.cat = dir.cid = "";
     $("q").value = ""; $("fCat").value = ""; $("fCid").value = "";
@@ -574,7 +607,19 @@ const DEMO = [
   { id: "EX-3", exemplo: true, nome: "Profissional Exemplo", empresa: "Clínica Exemplo", profissao: "Fisioterapeuta", especialidade: "", categoria: "Saúde e Bem-estar", cidade: "Goiânia/GO", instagram: "", whatsapp: "", descricao: "Atendimento em clínica e domiciliar para recuperação de lesões." }
 ];
 
-const dir = { lista: [], locais: [], carregado: false, q: "", cat: "", cid: "" };
+const dir = { lista: [], locais: [], carregado: false, q: "", cat: "", cid: "", bloqueado: false, total: 0, acesso: null };
+
+/* Chave de acesso à lista: o servidor entrega no cadastro e o navegador guarda */
+const ACESSO = "ndd-acesso";
+try { dir.acesso = JSON.parse(localStorage.getItem(ACESSO) || "null"); } catch (e) {}
+function salvarAcesso(a) {
+  dir.acesso = a;
+  try { localStorage.setItem(ACESSO, JSON.stringify(a)); } catch (e) {}
+}
+function esquecerAcesso() {
+  dir.acesso = null;
+  try { localStorage.removeItem(ACESSO); } catch (e) {}
+}
 const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const igUsuario = u => String(u || "").trim().toLowerCase().replace(/^https?:\/\/(www\.)?instagram\.com\//, "").replace(/^@/, "").split(/[/?#]/)[0].replace(/[^a-z0-9._]/g, "");
@@ -582,7 +627,8 @@ const ic = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const ICO = {
   pin: ic('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'),
   ig: ic('<rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/>'),
-  wa: ic('<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>')
+  wa: ic('<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>'),
+  cadeado: ic('<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>')
 };
 
 function waUrl(n) {
@@ -598,14 +644,18 @@ function iniciais(nome) {
 }
 
 async function buscarLista() {
-  if (!BACKEND) return DEMO;
+  if (!BACKEND) return dir.acesso ? { profissionais: DEMO } : { bloqueado: true, total: DEMO.length };
+  const a = dir.acesso || {};
+  const qs = "acao=lista&ig=" + encodeURIComponent(a.instagram || "") + "&chave=" + encodeURIComponent(a.chave || "") + "&t=" + Date.now();
   const url = BACKEND === "planilha"
-    ? window.PLANILHA_URL + (window.PLANILHA_URL.includes("?") ? "&" : "?") + "acao=lista&t=" + Date.now()
-    : API_URL + "/profissionais";
+    ? window.PLANILHA_URL + (window.PLANILHA_URL.includes("?") ? "&" : "?") + qs
+    : API_URL + "/profissionais?" + qs;
   const r = await fetch(url, { cache: "no-store" });
   const j = await r.json();
-  if (!j.ok || !Array.isArray(j.profissionais)) throw new Error("lista indisponível");
-  return j.profissionais;
+  if (!j.ok) throw new Error("lista indisponível");
+  if (j.bloqueado) return { bloqueado: true, total: j.total || 0 };
+  if (!Array.isArray(j.profissionais)) throw new Error("lista indisponível");
+  return { profissionais: j.profissionais };
 }
 
 async function atualizarLista(silencioso) {
@@ -614,7 +664,15 @@ async function atualizarLista(silencioso) {
     $("resInfo").textContent = "Carregando profissionais…";
   }
   try {
-    const base = await buscarLista();
+    const res = await buscarLista();
+    if (res.bloqueado) {
+      if (dir.acesso && BACKEND) esquecerAcesso(); // chave inválida ou cadastro tirado do ar
+      dir.bloqueado = true; dir.total = res.total; dir.carregado = true;
+      renderDir();
+      return;
+    }
+    dir.bloqueado = false;
+    const base = res.profissionais;
     const agora = Date.now();
     dir.locais = dir.locais.filter(x => agora - x.t < 180000 && !base.some(p => p.id === x.p.id));
     dir.lista = base.concat(dir.locais.map(x => x.p));
@@ -657,8 +715,57 @@ function cartao(p) {
   </article>`;
 }
 
+function renderTrava() {
+  const n = dir.total;
+  const frase = n > 1
+    ? `Cadastre seu negócio para liberar a lista com os <b>${n} profissionais</b> da comunidade, com Instagram e contato de cada um.`
+    : n === 1
+      ? "Cadastre seu negócio para liberar a lista de profissionais da comunidade, com Instagram e contato de cada um."
+      : "Cadastre seu negócio e seja um dos primeiros profissionais do guia.";
+  const fake = '<div class="fake"><i></i><i></i><i></i><i></i><i></i></div>';
+  $("grupos").innerHTML = `<div class="trava">
+    <div class="trava-fundo" aria-hidden="true">${fake + fake + fake}</div>
+    <div class="trava-box">
+      <div class="cadeado">${ICO.cadeado}</div>
+      <h3>Lista exclusiva para quem faz parte</h3>
+      <p>${frase}</p>
+      <button class="send" type="button" id="irCadastro">Fazer meu cadastro</button>
+      <button class="limpar" type="button" id="jaCad" aria-expanded="false" aria-controls="formAcesso">Já me cadastrei</button>
+      <form class="acesso" id="formAcesso" hidden novalidate>
+        <label class="sr" for="igAcesso">Instagram usado no cadastro</label>
+        <div class="at"><span>@</span><input class="in" id="igAcesso" maxlength="60" placeholder="Instagram do seu cadastro" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+        <button class="send" type="submit">Liberar acesso</button>
+        <p class="erro" id="erroAcesso" role="alert"></p>
+      </form>
+    </div>
+  </div>`;
+}
+
+async function liberar(instagram, erroEl, btn) {
+  const usuario = igUsuario(instagram);
+  if (!usuario) { erroEl.textContent = "Digite o Instagram que você usou no cadastro."; return; }
+  btn.disabled = true;
+  try {
+    const r = await enviar({ tipo: "acesso", instagram: usuario });
+    if (!r.ok) throw new Error(r.erro || "Falha");
+    salvarAcesso({ instagram: r.instagram || usuario, chave: r.chave || "demo" });
+    dir.carregado = false;
+    await atualizarLista();
+    if (dir.bloqueado) throw new Error("Não foi possível liberar a lista agora. Tente de novo.");
+    $("profissionais").scrollIntoView({ behavior: calmo ? "auto" : "smooth", block: "start" });
+  } catch (e) {
+    erroEl.textContent = e.message && e.message !== "Failed to fetch" ? e.message : "Não foi possível liberar agora. Verifique a conexão e tente de novo.";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 function renderDir() {
-  const cidades = [...new Set(dir.lista.map(p => String(p.cidade || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  $("tagDir").textContent = dir.bloqueado ? "Exclusivo para membros" : "Acesso liberado · atualizado automaticamente";
+  $("buscaBox").hidden = dir.bloqueado;
+  $("resBar").hidden = dir.bloqueado;
+  if (dir.bloqueado) { renderTrava(); return; }
+  const cidades =[...new Set(dir.lista.map(p => String(p.cidade || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
   const fCid = $("fCid");
   fCid.innerHTML = '<option value="">Todas as cidades</option>' + cidades.map(c => `<option>${esc(c)}</option>`).join("");
   fCid.value = cidades.includes(dir.cid) ? dir.cid : "";
@@ -704,8 +811,25 @@ $("limpar").addEventListener("click", () => {
   $("q").value = ""; $("fCat").value = ""; $("fCid").value = "";
   renderDir();
 });
+$("grupos").addEventListener("submit", e => {
+  if (e.target.id !== "formAcesso") return;
+  e.preventDefault();
+  liberar($("igAcesso").value, $("erroAcesso"), e.target.querySelector("[type=submit]"));
+});
 $("grupos").addEventListener("click", e => {
   if (e.target.closest("[data-exemplo]")) { e.preventDefault(); return; }
+  if (e.target.closest("#irCadastro")) {
+    $("tForm").scrollIntoView({ behavior: calmo ? "auto" : "smooth", block: "start" });
+    $("nome").focus({ preventScroll: true });
+    return;
+  }
+  const ja = e.target.closest("#jaCad");
+  if (ja) {
+    const f = $("formAcesso"); f.hidden = !f.hidden;
+    ja.setAttribute("aria-expanded", String(!f.hidden));
+    if (!f.hidden) $("igAcesso").focus();
+    return;
+  }
   const a = e.target.closest("a[data-cat]");
   if (!a) return;
   e.preventDefault();

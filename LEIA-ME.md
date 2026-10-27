@@ -64,6 +64,13 @@ Logo abaixo do formulário fica **Profissionais da nossa comunidade**:
 - Um cadastro novo aparece na lista na hora, sem recarregar a página.
 - A página busca a lista de novo a cada minuto e sempre que a pessoa volta para a aba.
 
+**Lista só para quem se cadastrou:**
+- Quem ainda não se cadastrou vê a seção borrada, com cadeado, o número de profissionais e o botão "Fazer meu cadastro". O servidor não envia os dados dessas pessoas para quem não tem cadastro.
+- Ao se cadastrar, a pessoa recebe uma chave de acesso, que fica guardada no navegador, e a lista abre na hora.
+- Em outro celular ou navegador, basta clicar em "Já me cadastrei" e digitar o Instagram do cadastro.
+- Quem estiver com Status Recusado ou Inativo perde o acesso.
+- Limite: quem souber o Instagram de alguém cadastrado consegue liberar a lista por "Já me cadastrei". Para um guia de comunidade, isso é um meio-termo razoável.
+
 **Moderação:**
 - Por padrão, o cadastro aparece no site assim que é enviado.
 - Para tirar alguém do ar, mude o Status para **Recusado** ou **Inativo**. Some do site em até 30 segundos.
