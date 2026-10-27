@@ -27,7 +27,8 @@ const COLUNAS = [
   ['ID', 90], ['Data do cadastro', 130], ['Status', 100], ['Nome completo', 200], ['Nome da empresa', 170],
   ['Profissão', 150], ['Categoria profissional', 200], ['Especialidade', 160], ['Cidade e estado', 140],
   ['Instagram', 140], ['Link do Instagram', 240], ['WhatsApp comercial', 140], ['Descrição dos serviços', 340],
-  ['Interesse em parcerias', 110], ['Autorizou divulgação', 100], ['Observações da administração', 220]
+  ['Interesse em parcerias', 110], ['Autorizou divulgação', 100], ['Observações da administração', 220],
+  ['Foto', 120]
 ];
 const CABECALHO = COLUNAS.map(c => c[0]);
 const CATEGORIAS = [
@@ -61,6 +62,7 @@ function setup() {
     regra('Novo', '#FFF5D2'), regra('Aprovado', '#E4EFE7'), regra('Recusado', '#F6E1E1'), regra('Inativo', '#EEEEEE')
   ]);
   if (!sh.getFilter()) sh.getRange(1, 1, sh.getMaxRows(), CABECALHO.length).createFilter();
+  sh.getRange(1, CABECALHO.indexOf('Foto') + 1, sh.getMaxRows()).setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
 
   segredo_();
   const vazia = ss.getSheetByName('Página1') || ss.getSheetByName('Sheet1');
@@ -166,8 +168,27 @@ function publico_(r) {
     id: s('ID'), nome: s('Nome completo'), empresa: s('Nome da empresa'),
     profissao: s('Profissão'), especialidade: s('Especialidade'), categoria: s('Categoria profissional'),
     cidade: s('Cidade e estado'), instagram: usuario_(s('Instagram')),
-    whatsapp: s('WhatsApp comercial').replace(/\D/g, ''), descricao: s('Descrição dos serviços')
+    whatsapp: s('WhatsApp comercial').replace(/\D/g, ''), descricao: s('Descrição dos serviços'),
+    foto: fotoValida_(s('Foto'))
   };
+}
+
+// Aceita a foto enviada pelo site (imagem reduzida, em texto) ou um link https colado na planilha.
+function fotoValida_(f) {
+  f = String(f || '').trim();
+  if (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(f) && f.length <= 30000) return f;
+  if (/^https:\/\/[^\s"'<>]+$/.test(f) && f.length <= 500) return f;
+  return '';
+}
+
+// Planilhas criadas antes de uma coluna nova (ex.: Foto) ganham o cabeçalho que falta.
+function garantirCabecalho_(sh) {
+  const atual = sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), CABECALHO.length)).getValues()[0];
+  CABECALHO.forEach((h, i) => {
+    if (String(atual[i] || '').trim()) return;
+    sh.getRange(1, i + 1).setValue(h).setFontWeight('bold').setFontColor('#FFFFFF').setBackground('#0A6B3B');
+    if (h === 'Foto') sh.getRange(1, i + 1, sh.getMaxRows()).setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
+  });
 }
 
 /* ---------- Gravação ---------- */
@@ -189,6 +210,7 @@ function salvar_(d) {
   try {
     const ss = SpreadsheetApp.getActive();
     const sh = ss.getSheetByName(CONFIG.ABA) || (setup(), ss.getSheetByName(CONFIG.ABA));
+    garantirCabecalho_(sh);
 
     // Evita cadastro repetido (clique duplo ou envio de novo pela mesma pessoa).
     const repetido = linhas_().some(r => usuario_(r['Instagram']) === usuario && String(r['Status']).trim() !== 'Recusado');
@@ -205,7 +227,8 @@ function salvar_(d) {
       'WhatsApp comercial': whats ? "'" + whats : '',
       'Descrição dos serviços': texto_(d.descricao, 280),
       'Interesse em parcerias': PARCERIAS.indexOf(d.parcerias) >= 0 ? d.parcerias : 'A combinar',
-      'Autorizou divulgação': 'Sim', 'Observações da administração': ''
+      'Autorizou divulgação': 'Sim', 'Observações da administração': '',
+      'Foto': fotoValida_(d.foto).indexOf('data:') === 0 ? fotoValida_(d.foto) : ''
     };
     sh.appendRow(CABECALHO.map(h => v[h]));
     sh.getRange(sh.getLastRow(), CABECALHO.indexOf('Link do Instagram') + 1)

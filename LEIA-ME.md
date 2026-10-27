@@ -64,6 +64,12 @@ Logo abaixo do formulário fica **Profissionais da nossa comunidade**:
 - Um cadastro novo aparece na lista na hora, sem recarregar a página.
 - A página busca a lista de novo a cada minuto e sempre que a pessoa volta para a aba.
 
+**Foto de perfil:**
+- Campo opcional no formulário. O próprio celular recorta a foto em quadrado e a reduz para 240×240, com uns 10 KB.
+- A foto fica na coluna **Foto** da planilha, como um texto longo que começa com `data:image`. Não apague esse texto: ele é a foto.
+- Para colocar ou trocar a foto de alguém, cole na coluna **Foto** um link `https://` de uma imagem pública.
+- Quem não enviou foto aparece com as iniciais do nome.
+
 **Lista só para quem se cadastrou:**
 - Quem ainda não se cadastrou vê a seção borrada, com cadeado, o número de profissionais e o botão "Fazer meu cadastro". O servidor não envia os dados dessas pessoas para quem não tem cadastro.
 - Ao se cadastrar, a pessoa recebe uma chave de acesso, que fica guardada no navegador, e a lista abre na hora.

@@ -47,8 +47,10 @@ COLUNAS = [
     ("Especialidade", 22), ("Cidade e estado", 20), ("Instagram", 20),
     ("Link do Instagram", 34), ("WhatsApp comercial", 18), ("Descrição dos serviços", 50),
     ("Interesse em parcerias", 14), ("Autorizou divulgação", 12), ("Observações da administração", 30),
+    ("Foto", 14),
 ]
 CABECALHO = [c for c, _ in COLUNAS]
+CAMPOS_CSV = [c for c in CABECALHO if c != "Foto"]  # a foto fica só na planilha
 CATEGORIAS = [
     "Marketing e Comunicação", "Advocacia e Jurídico", "Saúde e Bem-estar", "Beleza e Estética",
     "Contabilidade e Finanças", "Tecnologia e Informática", "Vendas e Comércio",
@@ -110,6 +112,16 @@ def criar_planilha():
     wb.save(PLANILHA)
 
 
+def foto_valida(f):
+    """Foto enviada pelo site (imagem reduzida, em texto) ou link https colado na planilha."""
+    f = str(f or "").strip()
+    if re.fullmatch(r"data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+", f) and len(f) <= 30000:
+        return f
+    if re.fullmatch(r"https://[^\s\"'<>]+", f) and len(f) <= 500:
+        return f
+    return ""
+
+
 def texto(v, maximo):
     return re.sub(r"[\r\n\t]+", " ", str(v or "")).strip()[:maximo]
 
@@ -141,6 +153,7 @@ def validar(d):
         "Interesse em parcerias": d["parcerias"] if d["parcerias"] in PARCERIAS else "A combinar",
         "Autorizou divulgação": "Sim",
         "Observações da administração": "",
+        "Foto": foto_valida(d.get("foto")) if str(d.get("foto") or "").startswith("data:") else "",
     }
 
 
@@ -156,7 +169,7 @@ def proximo_id(ws):
 def gravar_csv(reg):
     novo = not os.path.exists(BACKUP_CSV)
     with open(BACKUP_CSV, "a", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=CABECALHO, delimiter=";")
+        w = csv.DictWriter(f, fieldnames=CAMPOS_CSV, delimiter=";", extrasaction="ignore")
         if novo:
             w.writeheader()
         linha = {}
@@ -175,6 +188,11 @@ def gravar_planilha(registros):
         criar_planilha()
     wb = load_workbook(PLANILHA)
     ws = wb["CADASTROS"]
+    for col, nome in enumerate(CABECALHO, start=1):  # planilhas antigas ganham colunas novas (ex.: Foto)
+        if ws.cell(row=1, column=col).value in (None, ""):
+            c = ws.cell(row=1, column=col, value=nome)
+            c.font = Font(name="Arial", bold=True, color="FFFFFF")
+            c.fill = PatternFill("solid", start_color="0A6B3B")
     ultima = ws.max_row
     while ultima > 1 and all(c.value in (None, "") for c in ws[ultima]):
         ultima -= 1
@@ -221,6 +239,7 @@ def publico(r):
         "categoria": s("Categoria profissional"), "cidade": s("Cidade e estado"),
         "instagram": s("Instagram").lstrip("@"), "whatsapp": re.sub(r"\D", "", s("WhatsApp comercial")),
         "descricao": s("Descrição dos serviços"),
+        "foto": foto_valida(s("Foto")),
     }
 
 
@@ -329,7 +348,7 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json(404, {"ok": False, "erro": "Endereço não encontrado."})
         try:
             tam = int(self.headers.get("Content-Length") or 0)
-            if tam <= 0 or tam > 20000:
+            if tam <= 0 or tam > 60000:
                 raise ValueError("Envio vazio ou grande demais.")
             d = json.loads(self.rfile.read(tam).decode("utf-8"))
             if not isinstance(d, dict):

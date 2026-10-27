@@ -138,6 +138,16 @@ textarea { min-height: 104px; resize: vertical; line-height: 1.45; }
 .pills input:checked + span { background: var(--green); border-color: var(--green); color: #04150C; box-shadow: 0 0 18px rgba(24,181,102,.45); }
 .pills input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 3px; }
 
+.foto-row { display: flex; align-items: center; gap: 14px; }
+.foto-prev { flex: none; display: grid; place-items: center; width: 76px; height: 76px; overflow: hidden; border-radius: 20px; border: 1.5px dashed rgba(220,255,235,.28); background: var(--field); color: var(--muted); cursor: pointer; transition: border-color .2s; }
+.foto-prev:hover { border-color: var(--green); }
+.foto-prev svg { width: 28px; height: 28px; }
+.foto-prev img { width: 100%; height: 100%; object-fit: cover; }
+.foto-prev.tem { border-style: solid; border-color: var(--green); box-shadow: 0 0 18px rgba(24,181,102,.35); }
+.foto-acoes { display: grid; justify-items: start; gap: 4px; min-width: 0; }
+.bt-foto { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--field); color: var(--fg); font: 600 0.9rem var(--f-body); cursor: pointer; }
+.bt-foto:hover { border-color: var(--green); }
+.foto-acoes .limpar { padding: 0; font-size: 0.82rem; }
 .check { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); font-size: 0.88rem; color: #CFE0D6; cursor: pointer; }
 .check input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--green); }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
@@ -209,7 +219,8 @@ textarea { min-height: 104px; resize: vertical; line-height: 1.45; }
 .pro.novo { animation: brilho 2.4s ease-out 2; }
 @keyframes brilho { 30% { box-shadow: 0 0 0 3px rgba(247,203,60,.7), 0 0 44px rgba(247,203,60,.35); } 100% { box-shadow: 0 0 0 0 rgba(247,203,60,0); } }
 .pro-top { display: flex; gap: 12px; align-items: center; min-width: 0; }
-.av { flex: none; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, var(--green-2), var(--blue)); color: #FFFFFF; font: 800 1rem var(--f-display); font-stretch: 110%; }
+img.av { object-fit: cover; background: var(--field); }
+.av { flex: none; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, var(--green-2), var(--blue)); color: #FFFFFF; font: 800 1rem var(--f-display); font-stretch: 110%; }
 .pro h4 { margin: 0; font-size: 1.05rem; line-height: 1.25; overflow-wrap: anywhere; }
 .pro .emp { margin: 2px 0 0; font-size: 0.86rem; color: var(--gold); overflow-wrap: anywhere; }
 .pro .role { margin: 0; font-size: 0.9rem; font-weight: 600; color: #CFE0D6; overflow-wrap: anywhere; }
@@ -294,6 +305,17 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
       </div>
 
       <form id="form" novalidate>
+        <div class="fld full"><span class="lbl" id="lFoto">Foto de perfil <span class="opt">(opcional)</span></span>
+          <div class="foto-row">
+            <label class="foto-prev" id="fotoPrev" for="foto" aria-label="Escolher foto de perfil"></label>
+            <div class="foto-acoes">
+              <label class="bt-foto" id="fotoBtn" for="foto">Escolher foto</label>
+              <button class="limpar" type="button" id="fotoRemover" hidden>Remover foto</button>
+              <span class="hint" id="fotoHint">Use uma foto sua ou a logo do negócio. Ela é recortada em quadrado.</span>
+            </div>
+            <input class="sr" type="file" id="foto" accept="image/*" aria-labelledby="lFoto">
+          </div>
+        </div>
         <div class="fld full"><label for="nome">Nome completo</label><input class="in" id="nome" name="nome" required maxlength="80" autocomplete="name" placeholder="Como você quer aparecer no guia"></div>
         <div class="fld"><label for="empresa">Empresa <span class="opt">(se houver)</span></label><input class="in" id="empresa" name="empresa" maxlength="80" autocomplete="organization" placeholder="Nome comercial"></div>
         <div class="fld"><label for="profissao">Profissão</label><input class="in" id="profissao" name="profissao" required maxlength="60" placeholder="Ex.: Advogada, Contador"></div>
@@ -513,6 +535,56 @@ async function enviar(dados) {
   return j;
 }
 
+/* Foto de perfil: recortada em quadrado e reduzida no próprio celular antes do envio */
+let fotoData = "";
+const CAMERA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>';
+
+function mostrarFoto() {
+  const prev = $("fotoPrev");
+  prev.innerHTML = fotoData ? `<img src="${fotoData}" alt="Prévia da sua foto">` : CAMERA;
+  prev.classList.toggle("tem", !!fotoData);
+  $("fotoBtn").textContent = fotoData ? "Trocar foto" : "Escolher foto";
+  $("fotoRemover").hidden = !fotoData;
+}
+
+async function reduzirFoto(arquivo) {
+  const url = URL.createObjectURL(arquivo);
+  try {
+    const img = await new Promise((ok, falha) => { const i = new Image(); i.onload = () => ok(i); i.onerror = falha; i.src = url; });
+    const lado = Math.min(img.naturalWidth, img.naturalHeight);
+    const cv = document.createElement("canvas");
+    cv.width = cv.height = 240;
+    cv.getContext("2d").drawImage(img, (img.naturalWidth - lado) / 2, (img.naturalHeight - lado) / 2, lado, lado, 0, 0, 240, 240);
+    let q = 0.82, d = cv.toDataURL("image/jpeg", q);
+    while (d.length > 28000 && q > 0.4) { q -= 0.1; d = cv.toDataURL("image/jpeg", q); }
+    if (d.length > 28000) throw new Error("foto grande demais");
+    return d;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+$("foto").addEventListener("change", async e => {
+  const arquivo = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!arquivo) return;
+  const hint = $("fotoHint");
+  if (!arquivo.type.startsWith("image/")) { hint.textContent = "Escolha um arquivo de imagem (JPG ou PNG)."; return; }
+  try {
+    fotoData = await reduzirFoto(arquivo);
+    hint.textContent = "Foto pronta. Ela aparece no seu cartão do guia.";
+  } catch (err) {
+    hint.textContent = "Não foi possível abrir essa imagem. Tente outra foto, em JPG ou PNG.";
+  }
+  mostrarFoto();
+});
+$("fotoRemover").addEventListener("click", () => {
+  fotoData = "";
+  $("fotoHint").textContent = "Use uma foto sua ou a logo do negócio. Ela é recortada em quadrado.";
+  mostrarFoto();
+});
+mostrarFoto();
+
 let enviando = false;
 form.addEventListener("submit", async e => {
   e.preventDefault();
@@ -531,6 +603,7 @@ form.addEventListener("submit", async e => {
   new FormData(form).forEach((v, k) => { dados[k] = String(v).trim(); });
   dados.autorizacao = true;
   dados.whatsapp = wa;
+  if (fotoData) dados.foto = fotoData;
 
   const btn = $("enviar"), html = btn.innerHTML;
   enviando = true;
@@ -561,11 +634,12 @@ async function concluido(r, dados) {
   if (!perfil && r.demo) {
     perfil = { id: "DEMO-" + Date.now(), nome: dados.nome, empresa: dados.empresa, profissao: dados.profissao,
       especialidade: dados.especialidade, categoria: dados.categoria, cidade: dados.cidade,
-      instagram: dados.instagram, whatsapp: dados.whatsapp, descricao: dados.descricao };
+      instagram: dados.instagram, whatsapp: dados.whatsapp, descricao: dados.descricao, foto: dados.foto || "" };
   }
   const publicado = !!perfil && r.publicado !== false;
 
   form.reset();
+  fotoData = ""; mostrarFoto();
   form.querySelectorAll(".fld").forEach(f => f.classList.remove("err"));
   $("nDesc").textContent = "0/280";
   progresso();
@@ -640,6 +714,12 @@ function waUrl(n) {
   if (!(d.startsWith("55") && d.length >= 12)) d = "55" + d;
   return "https://wa.me/" + d + "?text=" + encodeURIComponent("Olá! Encontrei seu contato no guia do Networking da Direita.");
 }
+function fotoSegura(f) {
+  f = String(f || "");
+  if (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(f)) return f;
+  if (/^https:\/\/[^\s"'<>]+$/.test(f)) return f;
+  return "";
+}
 function iniciais(nome) {
   const p = String(nome || "").trim().split(/\s+/).filter(w => w.length > 2);
   const w = p.length ? p : String(nome || "?").trim().split(/\s+/);
@@ -707,9 +787,13 @@ function cartao(p) {
   const dis = p.exemplo ? ' aria-disabled="true" tabindex="-1" data-exemplo="1"' : ' target="_blank" rel="noopener"';
   const btIg = ig ? `<a class="bt bt-ig" href="${ig}"${dis}>${ICO.ig}Visitar Instagram</a>` : "";
   const btWa = wa ? `<a class="bt bt-wa" href="${wa}" target="_blank" rel="noopener">${ICO.wa}Entrar em contato</a>` : "";
+  const foto = fotoSegura(p.foto);
+  const avatar = foto
+    ? `<img class="av" src="${esc(foto)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
+    : `<div class="av" aria-hidden="true">${esc(iniciais(p.nome))}</div>`;
   return `<article class="pro" data-id="${esc(p.id)}">
     ${p.exemplo ? '<span class="ex">Exemplo</span>' : ""}
-    <div class="pro-top"><div class="av" aria-hidden="true">${esc(iniciais(p.nome))}</div>
+    <div class="pro-top">${avatar}
       <div style="min-width:0"><h4>${esc(p.nome)}</h4>${p.empresa ? `<p class="emp">${esc(p.empresa)}</p>` : ""}</div></div>
     ${role ? `<p class="role">${role}</p>` : ""}
     ${p.cidade ? `<p class="loc">${ICO.pin}${esc(p.cidade)}</p>` : ""}
