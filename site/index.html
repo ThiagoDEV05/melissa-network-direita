@@ -61,8 +61,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   padding-block: 20px 40px;
   display: grid; gap: 28px;
 }
+.topo { display: grid; gap: 28px; min-width: 0; }
 @media (min-width: 960px) {
-  .page { grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 56px; align-items: start; padding-block: 48px 64px; }
+  .page { gap: 64px; padding-block: 48px 64px; }
+  .topo { grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 56px; align-items: start; }
   .hero { position: sticky; top: 48px; }
 }
 
@@ -244,6 +246,7 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
 <div class="fx" aria-hidden="true"><div class="grid"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="scan"></div></div>
 
 <main class="page">
+  <div class="topo">
   <section class="hero" aria-labelledby="titulo">
     <div class="flag-wrap"><canvas id="bandeira" width="520" height="400" role="img" aria-label="Bandeira do Brasil tremulando"></canvas></div>
     <span class="tag"><span class="pulse"></span>Cadastro aberto</span>
@@ -323,6 +326,7 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
       </details>
     </div>
   </section>
+  </div>
 
   <section class="dir" id="profissionais" aria-labelledby="tDir">
     <div class="dir-head">
