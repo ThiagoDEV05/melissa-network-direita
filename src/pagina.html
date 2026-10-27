@@ -151,21 +151,78 @@ textarea { min-height: 104px; resize: vertical; line-height: 1.45; }
 .send:active { transform: scale(.985); }
 .send:disabled { opacity: .7; cursor: wait; }
 .send svg { width: 20px; height: 20px; }
+@media (max-width: 420px) { .send { font-size: 0.9rem; letter-spacing: 0.03em; } }
 .spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.35); border-top-color: #fff; animation: rot .7s linear infinite; }
 @keyframes rot { to { transform: rotate(360deg); } }
 .erro { min-height: 1.2em; margin: 0; color: var(--danger); font-size: 0.9rem; font-weight: 600; text-align: center; }
 
-/* Sucesso */
-.ok { display: grid; justify-items: center; text-align: center; gap: 14px; padding: 18px 4px 6px; }
-.ok svg.tick { width: 92px; height: 92px; }
-.ok .c { stroke: var(--green); stroke-width: 3; fill: rgba(24,181,102,.1); stroke-dasharray: 280; stroke-dashoffset: 280; animation: draw .7s ease-out forwards; }
-.ok .t { stroke: var(--gold); stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 70; stroke-dashoffset: 70; animation: draw .45s .55s ease-out forwards; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Confirmação do cadastro */
+.okmsg { display: flex; gap: 12px; align-items: flex-start; margin-top: 16px; padding: 14px; border-radius: 14px; border: 1px solid rgba(24,181,102,.45); background: rgba(24,181,102,.1); font-size: 0.92rem; color: #D7E6DD; }
+.okmsg svg { flex: none; width: 38px; height: 38px; }
+.okmsg .c { stroke: var(--green); stroke-width: 4; fill: rgba(24,181,102,.12); stroke-dasharray: 280; stroke-dashoffset: 280; animation: draw .7s ease-out forwards; }
+.okmsg .t { stroke: var(--gold); stroke-width: 7; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 70; stroke-dashoffset: 70; animation: draw .45s .5s ease-out forwards; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
-.ok h2 { font-size: 1.6rem; }
-.ok p { margin: 0; color: var(--muted); max-width: 40ch; }
-.ok .demo { font-size: 0.85rem; color: var(--gold); }
-.ghost { min-height: 48px; padding: 0 20px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); color: var(--fg); font: 600 0.95rem var(--f-body); cursor: pointer; }
-.ghost:hover { border-color: var(--green); }
+.okmsg b { display: block; color: var(--fg); font-size: 1rem; }
+.okmsg small { display: block; margin-top: 4px; color: var(--gold); }
+.okmsg button { margin-top: 8px; padding: 0; border: 0; background: none; color: var(--gold); font: 700 0.9rem var(--f-body); cursor: pointer; }
+
+/* Diretório */
+.dir { grid-column: 1 / -1; min-width: 0; display: grid; gap: 16px; padding-top: 16px; scroll-margin-top: 16px; }
+.dir-head { display: grid; gap: 10px; }
+.dir-head h2 { margin: 0; font-family: var(--f-display); font-stretch: 118%; font-weight: 900; text-transform: uppercase; font-size: clamp(1.55rem, 5.4vw, 2.6rem); line-height: 1; text-wrap: balance; }
+.dir-head h2 span { color: var(--gold); }
+.dir-head p { margin: 0; color: var(--muted); }
+.busca { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: grid; gap: 8px; padding: 10px; border-radius: 16px; border: 1px solid var(--line); background: rgba(3,17,11,.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+@media (min-width: 760px) { .busca { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); } }
+.campo-busca { position: relative; display: block; }
+.campo-busca svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
+.campo-busca .in { padding-left: 42px; }
+.res-info { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 32px; font-size: 0.88rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.limpar { padding: 6px 0; border: 0; background: none; color: var(--gold); font: 600 0.88rem var(--f-body); cursor: pointer; }
+.grupos { display: grid; gap: 28px; }
+.grupo { display: grid; gap: 12px; min-width: 0; }
+.grupo-h { display: flex; align-items: center; gap: 10px; }
+.grupo-h h3 { margin: 0; font-family: var(--f-display); font-stretch: 110%; font-weight: 800; font-size: 1.12rem; }
+.grupo-h .n { padding: 2px 9px; border-radius: 99px; background: rgba(24,181,102,.14); color: var(--green); font-size: 0.78rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.grupo-h::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.cards, .vazios { display: grid; gap: 12px; }
+@media (min-width: 680px) { .cards, .vazios { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1040px) { .cards, .vazios { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.vazios { gap: 8px; }
+.vazio-cat { display: grid; gap: 2px; padding: 12px 14px; border-radius: 12px; border: 1px dashed var(--line); font-size: 0.86rem; color: var(--muted); }
+.vazio-cat b { color: var(--fg); font-weight: 600; }
+.vazio-cat a { color: var(--gold); font-weight: 600; text-decoration: none; }
+.aviso { padding: 26px 18px; border-radius: 16px; border: 1px dashed var(--line); text-align: center; color: var(--muted); }
+.aviso b { display: block; margin-bottom: 4px; color: var(--fg); }
+.aviso button { margin-top: 10px; }
+.skel { height: 230px; border-radius: 16px; background: linear-gradient(90deg, rgba(255,255,255,.03), rgba(255,255,255,.08), rgba(255,255,255,.03)); background-size: 200% 100%; animation: flow 1.3s linear infinite; }
+
+/* Cartão do profissional */
+.pro { position: relative; display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px; border-radius: 16px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); transition: border-color .2s, box-shadow .2s; }
+.pro:hover { border-color: rgba(24,181,102,.45); box-shadow: 0 12px 32px rgba(0,0,0,.28); }
+.pro.novo { animation: brilho 2.4s ease-out 2; }
+@keyframes brilho { 30% { box-shadow: 0 0 0 3px rgba(247,203,60,.7), 0 0 44px rgba(247,203,60,.35); } 100% { box-shadow: 0 0 0 0 rgba(247,203,60,0); } }
+.pro-top { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.av { flex: none; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, var(--green-2), var(--blue)); color: #FFFFFF; font: 800 1rem var(--f-display); font-stretch: 110%; }
+.pro h4 { margin: 0; font-size: 1.05rem; line-height: 1.25; overflow-wrap: anywhere; }
+.pro .emp { margin: 2px 0 0; font-size: 0.86rem; color: var(--gold); overflow-wrap: anywhere; }
+.pro .role { margin: 0; font-size: 0.9rem; font-weight: 600; color: #CFE0D6; overflow-wrap: anywhere; }
+.pro .loc { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 0.86rem; color: var(--muted); }
+.pro .loc svg { flex: none; width: 15px; height: 15px; color: var(--green); }
+.pro .desc { margin: 0; font-size: 0.92rem; color: #D7E6DD; overflow-wrap: anywhere; }
+.pro .ex { position: absolute; top: 12px; right: 12px; padding: 2px 8px; border-radius: 99px; background: rgba(61,110,224,.18); color: #A9C1FF; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.acoes { display: grid; gap: 8px; margin-top: auto; padding-top: 4px; }
+.acoes.dois { grid-template-columns: 1fr 1fr; }
+@media (max-width: 400px) { .acoes.dois { grid-template-columns: 1fr; } }
+.bt { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 6px 10px; border-radius: 12px; text-decoration: none; text-align: center; line-height: 1.15; font: 800 0.74rem var(--f-display); font-stretch: 110%; letter-spacing: 0.06em; text-transform: uppercase; transition: filter .2s, background .2s; }
+.bt svg { flex: none; width: 16px; height: 16px; }
+.bt-ig { background: linear-gradient(100deg, var(--green-2), var(--green)); color: #FFFFFF; }
+.bt-ig:hover { filter: brightness(1.12); }
+.bt-wa { border: 1px solid rgba(247,203,60,.5); background: rgba(247,203,60,.06); color: var(--gold); }
+.bt-wa:hover { background: rgba(247,203,60,.14); }
+.bt[aria-disabled="true"] { opacity: .5; cursor: default; }
 
 details.regras { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; font-size: 0.86rem; color: var(--muted); }
 details.regras summary { cursor: pointer; font-weight: 600; color: var(--fg); list-style: none; display: flex; align-items: center; gap: 8px; }
@@ -201,7 +258,7 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
   <section class="card" aria-labelledby="tForm">
     <div class="card-in" id="painel">
       <h2 id="tForm">Cadastre seu negócio</h2>
-      <p class="lead">Preencha seus dados comerciais. A administração revisa antes de publicar no guia.</p>
+      <p class="lead">Preencha seus dados comerciais. Seu perfil entra na lista de profissionais da comunidade, logo abaixo.</p>
 
       <div class="prog" aria-hidden="true">
         <div class="prog-top"><span>Seu cadastro</span><b id="pct">0%</b></div>
@@ -245,10 +302,11 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
         <label class="check full" for="autorizacao"><input type="checkbox" id="autorizacao" name="autorizacao" required><span>Autorizo a divulgação, no guia do Networking da Direita, dos dados comerciais que informei aqui.</span></label>
         <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="full" style="display:grid;gap:10px">
-          <button class="send" type="submit" id="enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>Enviar cadastro</button>
+          <button class="send" type="submit" id="enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>Cadastrar profissional</button>
           <p class="erro" id="erro" role="alert"></p>
         </div>
       </form>
+      <div class="okmsg" id="okMsg" role="status" hidden></div>
 
       <details class="regras">
         <summary>Regras do guia</summary>
@@ -262,6 +320,25 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
         </ul>
       </details>
     </div>
+  </section>
+
+  <section class="dir" id="profissionais" aria-labelledby="tDir">
+    <div class="dir-head">
+      <span class="tag"><span class="pulse"></span>Atualizado automaticamente</span>
+      <h2 id="tDir">Profissionais da <span>nossa comunidade</span></h2>
+      <p>Encontre quem faz parte da rede, siga no Instagram e entre em contato.</p>
+    </div>
+    <div class="busca" role="search">
+      <label class="campo-busca" for="q">
+        <span class="sr">Pesquisar profissional</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="in" id="q" type="search" placeholder="Nome, profissão, empresa, cidade ou serviço" autocomplete="off" enterkeyhint="search">
+      </label>
+      <select id="fCat" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option></select>
+      <select id="fCid" aria-label="Filtrar por cidade"><option value="">Todas as cidades</option></select>
+    </div>
+    <div class="res-info"><span id="resInfo" aria-live="polite"></span><button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button></div>
+    <div id="grupos" class="grupos"></div>
   </section>
 </main>
 
@@ -406,9 +483,12 @@ async function enviar(dados) {
   return j;
 }
 
+let enviando = false;
 form.addEventListener("submit", async e => {
   e.preventDefault();
+  if (enviando) return;
   const erro = $("erro"); erro.textContent = "";
+  $("okMsg").hidden = true;
   const falta = marcarErros();
   if (falta) { erro.textContent = "Preencha os campos destacados."; falta.focus(); return; }
   if (!/^[a-zA-Z0-9._]{1,30}$/.test($("instagram").value.trim())) { erro.textContent = "Confira o Instagram: só letras, números, ponto e _."; $("instagram").focus(); return; }
@@ -423,29 +503,220 @@ form.addEventListener("submit", async e => {
   dados.whatsapp = wa;
 
   const btn = $("enviar"), html = btn.innerHTML;
-  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Enviando';
+  enviando = true;
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Cadastrando';
   try {
     const r = await enviar(dados);
     if (!r.ok) throw new Error(r.erro || "Falha no envio");
-    sucesso(dados.nome, r.demo);
+    concluido(r, dados);
   } catch (err) {
     erro.textContent = err.message && err.message !== "Failed to fetch" ? err.message : "Não foi possível enviar. Verifique a conexão e tente de novo.";
+  } finally {
+    enviando = false;
     btn.disabled = false; btn.innerHTML = html;
   }
 });
 
-function sucesso(nome, demo) {
-  const primeiro = String(nome).split(/\s+/)[0];
-  $("painel").innerHTML = `<div class="ok">
-    <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><circle class="c" cx="50" cy="50" r="44"/><path class="t" d="M30 52 45 66 71 38"/></svg>
-    <h2>Cadastro enviado, ${primeiro.replace(/[<>&"]/g, "")}!</h2>
-    <p>Recebemos seus dados. A administração vai revisar e, depois da aprovação, seu perfil entra no guia do Networking da Direita.</p>
-    ${demo ? '<p class="demo">Modo demonstração: nada foi gravado.</p>' : ""}
-    <button class="ghost" type="button" onclick="location.reload()">Fazer outro cadastro</button>
-  </div>`;
-  $("painel").scrollIntoView({ behavior: calmo ? "auto" : "smooth", block: "center" });
+function concluido(r, dados) {
+  let perfil = r.perfil || null;
+  if (!perfil && r.demo) {
+    perfil = { id: "DEMO-" + Date.now(), nome: dados.nome, empresa: dados.empresa, profissao: dados.profissao,
+      especialidade: dados.especialidade, categoria: dados.categoria, cidade: dados.cidade,
+      instagram: dados.instagram, whatsapp: dados.whatsapp, descricao: dados.descricao };
+  }
+  const publicado = !!perfil && r.publicado !== false;
+
+  form.reset();
+  form.querySelectorAll(".fld").forEach(f => f.classList.remove("err"));
+  $("nDesc").textContent = "0/280";
+  progresso();
+
+  const msg = $("okMsg");
+  msg.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="c" cx="50" cy="50" r="44"/><path class="t" d="M30 52 45 66 71 38"/></svg>
+    <div><b>${publicado ? "Cadastro publicado!" : "Cadastro recebido!"}</b>
+    ${publicado ? `Seu perfil já aparece em <strong>${esc(perfil.categoria)}</strong>, na lista de profissionais abaixo.` : "Seu perfil aparece na lista depois da aprovação da administração."}
+    ${r.demo ? "<small>Modo demonstração: nada foi gravado.</small>" : ""}
+    ${publicado ? '<br><button type="button" id="verPerfil">Ver meu perfil ↓</button>' : ""}</div>`;
+  msg.hidden = false;
+
+  if (publicado) {
+    dir.locais = dir.locais.filter(x => x.p.id !== perfil.id).concat({ p: perfil, t: Date.now() });
+    dir.lista = dir.lista.filter(p => p.id !== perfil.id).concat(perfil);
+    dir.q = dir.cat = dir.cid = "";
+    $("q").value = ""; $("fCat").value = ""; $("fCid").value = "";
+    renderDir();
+    const card = () => document.querySelector(`.pro[data-id="${CSS.escape(perfil.id)}"]`);
+    if (card()) card().classList.add("novo");
+    $("verPerfil").onclick = () => { const c = card(); if (c) c.scrollIntoView({ behavior: calmo ? "auto" : "smooth", block: "center" }); };
+  }
+  msg.scrollIntoView({ behavior: calmo ? "auto" : "smooth", block: "nearest" });
   if (!calmo) confete();
+  if (BACKEND) setTimeout(() => atualizarLista(true), 2500);
 }
+
+/* ---------- Profissionais da comunidade ---------- */
+const CATEGORIAS = [
+  "Marketing e Comunicação", "Advocacia e Jurídico", "Saúde e Bem-estar", "Beleza e Estética",
+  "Contabilidade e Finanças", "Tecnologia e Informática", "Vendas e Comércio",
+  "Empreendedorismo e Consultoria", "Imóveis e Construção", "Educação e Cursos",
+  "Alimentação e Gastronomia", "Prestadores de Serviços", "Outros Profissionais"
+];
+const BACKEND = window.PLANILHA_URL ? "planilha" : (API_URL ? "local" : "");
+
+/* Exemplos aparecem só na prévia sem banco de dados conectado */
+const DEMO = [
+  { id: "EX-1", exemplo: true, nome: "Profissional Exemplo", empresa: "Escritório Exemplo", profissao: "Advogada", especialidade: "Direito empresarial", categoria: "Advocacia e Jurídico", cidade: "Curitiba/PR", instagram: "", whatsapp: "", descricao: "Contratos, abertura de empresas e prevenção de riscos para pequenos empresários." },
+  { id: "EX-2", exemplo: true, nome: "Profissional Exemplo", empresa: "", profissao: "Gestor de tráfego", especialidade: "Anúncios para negócios locais", categoria: "Marketing e Comunicação", cidade: "São Paulo/SP", instagram: "", whatsapp: "", descricao: "Campanhas no Instagram e no Google para empresas que querem vender mais na própria cidade." },
+  { id: "EX-3", exemplo: true, nome: "Profissional Exemplo", empresa: "Clínica Exemplo", profissao: "Fisioterapeuta", especialidade: "", categoria: "Saúde e Bem-estar", cidade: "Goiânia/GO", instagram: "", whatsapp: "", descricao: "Atendimento em clínica e domiciliar para recuperação de lesões." }
+];
+
+const dir = { lista: [], locais: [], carregado: false, q: "", cat: "", cid: "" };
+const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const igUsuario = u => String(u || "").trim().toLowerCase().replace(/^https?:\/\/(www\.)?instagram\.com\//, "").replace(/^@/, "").split(/[/?#]/)[0].replace(/[^a-z0-9._]/g, "");
+const ic = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICO = {
+  pin: ic('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'),
+  ig: ic('<rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/>'),
+  wa: ic('<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>')
+};
+
+function waUrl(n) {
+  let d = String(n || "").replace(/\D/g, "");
+  if (d.length < 10) return "";
+  if (!(d.startsWith("55") && d.length >= 12)) d = "55" + d;
+  return "https://wa.me/" + d + "?text=" + encodeURIComponent("Olá! Encontrei seu contato no guia do Networking da Direita.");
+}
+function iniciais(nome) {
+  const p = String(nome || "").trim().split(/\s+/).filter(w => w.length > 2);
+  const w = p.length ? p : String(nome || "?").trim().split(/\s+/);
+  return ((w[0] || "?")[0] + (w.length > 1 ? w[w.length - 1][0] : "")).toUpperCase();
+}
+
+async function buscarLista() {
+  if (!BACKEND) return DEMO;
+  const url = BACKEND === "planilha"
+    ? window.PLANILHA_URL + (window.PLANILHA_URL.includes("?") ? "&" : "?") + "acao=lista&t=" + Date.now()
+    : API_URL + "/profissionais";
+  const r = await fetch(url, { cache: "no-store" });
+  const j = await r.json();
+  if (!j.ok || !Array.isArray(j.profissionais)) throw new Error("lista indisponível");
+  return j.profissionais;
+}
+
+async function atualizarLista(silencioso) {
+  if (!silencioso && !dir.carregado) {
+    $("grupos").innerHTML = '<div class="cards"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>';
+    $("resInfo").textContent = "Carregando profissionais…";
+  }
+  try {
+    const base = await buscarLista();
+    const agora = Date.now();
+    dir.locais = dir.locais.filter(x => agora - x.t < 180000 && !base.some(p => p.id === x.p.id));
+    dir.lista = base.concat(dir.locais.map(x => x.p));
+    dir.carregado = true;
+    renderDir();
+  } catch (e) {
+    if (dir.carregado) return;
+    $("resInfo").textContent = "";
+    $("grupos").innerHTML = '<div class="aviso"><b>Não foi possível carregar os profissionais agora.</b>Verifique sua conexão.<br><button class="limpar" type="button" id="tentar">Tentar de novo</button></div>';
+    $("tentar").onclick = () => atualizarLista();
+  }
+}
+
+function filtrados() {
+  const termos = norm(dir.q).split(/\s+/).filter(Boolean);
+  return dir.lista.filter(p => {
+    if (dir.cat && p.categoria !== dir.cat) return false;
+    if (dir.cid && norm(p.cidade) !== norm(dir.cid)) return false;
+    if (!termos.length) return true;
+    const texto = norm([p.nome, p.profissao, p.especialidade, p.empresa, p.cidade, p.descricao, p.categoria].join(" "));
+    return termos.every(t => texto.includes(t));
+  });
+}
+
+function cartao(p) {
+  const ig = p.exemplo ? "#" : (igUsuario(p.instagram) ? "https://www.instagram.com/" + igUsuario(p.instagram) + "/" : "");
+  const wa = p.exemplo ? "" : waUrl(p.whatsapp);
+  const role = [p.profissao, p.especialidade].filter(Boolean).map(esc).join(" · ");
+  const dis = p.exemplo ? ' aria-disabled="true" tabindex="-1" data-exemplo="1"' : ' target="_blank" rel="noopener"';
+  const btIg = ig ? `<a class="bt bt-ig" href="${ig}"${dis}>${ICO.ig}Visitar Instagram</a>` : "";
+  const btWa = wa ? `<a class="bt bt-wa" href="${wa}" target="_blank" rel="noopener">${ICO.wa}Entrar em contato</a>` : "";
+  return `<article class="pro" data-id="${esc(p.id)}">
+    ${p.exemplo ? '<span class="ex">Exemplo</span>' : ""}
+    <div class="pro-top"><div class="av" aria-hidden="true">${esc(iniciais(p.nome))}</div>
+      <div style="min-width:0"><h4>${esc(p.nome)}</h4>${p.empresa ? `<p class="emp">${esc(p.empresa)}</p>` : ""}</div></div>
+    ${role ? `<p class="role">${role}</p>` : ""}
+    ${p.cidade ? `<p class="loc">${ICO.pin}${esc(p.cidade)}</p>` : ""}
+    ${p.descricao ? `<p class="desc">${esc(p.descricao)}</p>` : ""}
+    ${btIg || btWa ? `<div class="acoes${btIg && btWa ? " dois" : ""}">${btIg}${btWa}</div>` : ""}
+  </article>`;
+}
+
+function renderDir() {
+  const cidades = [...new Set(dir.lista.map(p => String(p.cidade || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const fCid = $("fCid");
+  fCid.innerHTML = '<option value="">Todas as cidades</option>' + cidades.map(c => `<option>${esc(c)}</option>`).join("");
+  fCid.value = cidades.includes(dir.cid) ? dir.cid : "";
+  if (!fCid.value) dir.cid = "";
+
+  const lista = filtrados();
+  const filtrando = !!(dir.q || dir.cat || dir.cid);
+  $("limpar").hidden = !filtrando;
+  const n = lista.length;
+  $("resInfo").textContent = `${n} ${n === 1 ? "profissional" : "profissionais"}${filtrando ? (n === 1 ? " encontrado" : " encontrados") : " na comunidade"}`;
+
+  const soCategoria = dir.cat && !dir.q && !dir.cid;
+  if (!n && !soCategoria) {
+    $("grupos").innerHTML = '<div class="aviso"><b>Nenhum profissional encontrado. Tente outra pesquisa ou categoria.</b></div>';
+    return;
+  }
+
+  const extras = [...new Set(dir.lista.map(p => p.categoria).filter(c => c && !CATEGORIAS.includes(c)))];
+  const porCat = {};
+  lista.forEach(p => { (porCat[p.categoria] = porCat[p.categoria] || []).push(p); });
+  let html = "";
+  const vazias = [];
+  CATEGORIAS.concat(extras).forEach(c => {
+    if (dir.cat && c !== dir.cat) return;
+    const ps = (porCat[c] || []).sort((a, b) => String(a.nome).localeCompare(String(b.nome), "pt-BR"));
+    if (!ps.length) { if (!filtrando || soCategoria) vazias.push(c); return; }
+    html += `<div class="grupo"><div class="grupo-h"><h3>${esc(c)}</h3><span class="n">${ps.length}</span></div><div class="cards">${ps.map(cartao).join("")}</div></div>`;
+  });
+  if (vazias.length) {
+    const tiles = vazias.map(c => `<div class="vazio-cat"><b>${esc(c)}</b><span>Seja o primeiro profissional desta categoria. <a href="#tForm" data-cat="${esc(c)}">Cadastrar</a></span></div>`).join("");
+    html += `<div class="grupo"><div class="grupo-h"><h3>${soCategoria ? esc(dir.cat) : "Ainda sem profissionais"}</h3></div><div class="vazios">${tiles}</div></div>`;
+  }
+  $("grupos").innerHTML = html;
+}
+
+$("fCat").innerHTML = '<option value="">Todas as categorias</option>' + CATEGORIAS.map(c => `<option>${esc(c)}</option>`).join("");
+let qT;
+$("q").addEventListener("input", e => { clearTimeout(qT); qT = setTimeout(() => { dir.q = e.target.value; renderDir(); }, 150); });
+$("fCat").addEventListener("change", e => { dir.cat = e.target.value; renderDir(); });
+$("fCid").addEventListener("change", e => { dir.cid = e.target.value; renderDir(); });
+$("limpar").addEventListener("click", () => {
+  dir.q = dir.cat = dir.cid = "";
+  $("q").value = ""; $("fCat").value = ""; $("fCid").value = "";
+  renderDir();
+});
+$("grupos").addEventListener("click", e => {
+  if (e.target.closest("[data-exemplo]")) { e.preventDefault(); return; }
+  const a = e.target.closest("a[data-cat]");
+  if (!a) return;
+  e.preventDefault();
+  $("categoria").value = a.dataset.cat;
+  progresso();
+  $("tForm").scrollIntoView({ behavior: calmo ? "auto" : "smooth", block: "start" });
+  $("nome").focus({ preventScroll: true });
+});
+
+/* Atualiza sozinho: a cada minuto e quando a pessoa volta para a aba */
+if (BACKEND) {
+  setInterval(() => { if (!document.hidden) atualizarLista(true); }, 60000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) atualizarLista(true); });
+}
+atualizarLista();
 
 /* ---------- Confete verde, amarelo, azul e branco ---------- */
 function confete() {

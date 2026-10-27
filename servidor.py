@@ -52,6 +52,9 @@ CATEGORIAS = [
 ]
 PARCERIAS = ["Sim", "A combinar", "Não"]
 STATUS = ["Novo", "Aprovado", "Recusado", "Inativo"]
+# False: o cadastro aparece na lista do site na hora (Recusado ou Inativo tira do ar).
+# True: só aparece depois que o Status for mudado para Aprovado.
+EXIGIR_APROVACAO = False
 
 trava = threading.Lock()
 fila = []  # cadastros que não couberam na planilha (ex.: arquivo aberto e travado)
@@ -86,8 +89,9 @@ def criar_planilha():
     linhas = [
         "NETWORKING DA DIREITA: planilha de cadastros",
         "",
-        "Cada envio do formulário vira uma linha na aba CADASTROS com Status \"Novo\" (amarelo).",
-        "Depois de revisar, mude o Status para Aprovado, Recusado ou Inativo (lista suspensa).",
+        "Cada envio do formulário vira uma linha na aba CADASTROS com Status \"Novo\" (amarelo)",
+        "e já aparece na lista de profissionais do site.",
+        "Para tirar alguém do site, mude o Status para Recusado ou Inativo (lista suspensa).",
         "Use as setinhas do cabeçalho para filtrar, por exemplo, só os Novos ou uma categoria.",
         "A coluna \"Observações da administração\" é livre para anotações.",
         "",
@@ -186,11 +190,52 @@ def gravar_planilha(registros):
     os.replace(tmp, PLANILHA)
 
 
+def ler_registros():
+    """Linhas da planilha (mais as que ainda estão na fila) como dicionários."""
+    regs = []
+    if os.path.exists(PLANILHA):
+        wb = load_workbook(PLANILHA, read_only=True)
+        linhas = wb["CADASTROS"].iter_rows(values_only=True)
+        cab = [str(c or "").strip() for c in next(linhas, ())]
+        regs = [dict(zip(cab, l)) for l in linhas if any(v not in (None, "") for v in l)]
+        wb.close()
+    return regs + list(fila)
+
+
+def publico(r):
+    """Cartão público de um cadastro, ou None se não deve aparecer no site."""
+    s = lambda k: str(r.get(k) or "").strip()
+    st = s("Status")
+    if st in ("Recusado", "Inativo") or (EXIGIR_APROVACAO and st != "Aprovado"):
+        return None
+    if s("Autorizou divulgação") != "Sim" or not s("Nome completo"):
+        return None
+    return {
+        "id": s("ID"), "nome": s("Nome completo"), "empresa": s("Nome da empresa"),
+        "profissao": s("Profissão"), "especialidade": s("Especialidade"),
+        "categoria": s("Categoria profissional"), "cidade": s("Cidade e estado"),
+        "instagram": s("Instagram").lstrip("@"), "whatsapp": re.sub(r"\D", "", s("WhatsApp comercial")),
+        "descricao": s("Descrição dos serviços"),
+    }
+
+
+def listar():
+    with trava:
+        return [p for p in map(publico, ler_registros()) if p]
+
+
 def salvar_cadastro(d):
     campos = validar(d)
     with trava:
         if not os.path.exists(PLANILHA):
             criar_planilha()
+        try:
+            existentes = ler_registros()
+        except Exception:
+            existentes = list(fila)
+        if any(str(r.get("Instagram") or "").strip().lower() == campos["Instagram"]
+               and str(r.get("Status") or "").strip() != "Recusado" for r in existentes):
+            raise ValueError("Este Instagram já está cadastrado no guia.")
         try:
             n = proximo_id(load_workbook(PLANILHA, read_only=True)["CADASTROS"])
         except Exception:
@@ -206,7 +251,8 @@ def salvar_cadastro(d):
         except Exception as e:
             print(f"  ! {reg['ID']} salvo só no backup CSV: a planilha parece aberta ou travada ({e}). "
                   "Feche a planilha; o próximo envio grava os pendentes.")
-    return reg["ID"]
+    perfil = publico(reg)
+    return {"id": reg["ID"], "publicado": perfil is not None, "perfil": perfil}
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -229,6 +275,15 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(corpo)
 
+    def do_GET(self):
+        if self.path.split("?")[0] == "/api/profissionais":
+            try:
+                return self.json(200, {"ok": True, "profissionais": listar()})
+            except Exception as e:
+                print("  ! não consegui ler a planilha:", e)
+                return self.json(500, {"ok": False, "erro": "Não foi possível ler a planilha."})
+        return super().do_GET()
+
     def do_POST(self):
         if self.path.split("?")[0] != "/api/cadastro":
             return self.json(404, {"ok": False, "erro": "Endereço não encontrado."})
@@ -241,7 +296,7 @@ class Handler(SimpleHTTPRequestHandler):
                 raise ValueError("Formato inválido.")
             if d.get("website"):  # campo invisível: só robôs preenchem
                 return self.json(200, {"ok": True})
-            return self.json(200, {"ok": True, "id": salvar_cadastro(d)})
+            return self.json(200, {"ok": True, **salvar_cadastro(d)})
         except ValueError as e:
             return self.json(400, {"ok": False, "erro": str(e)})
         except Exception as e:

@@ -55,6 +55,23 @@ Na primeira vez, se o Mac disser "não pode ser aberto": botão direito em `inic
 
 ---
 
+## Lista de profissionais na página
+
+Logo abaixo do formulário fica **Profissionais da nossa comunidade**:
+- A lista vem da planilha e é separada por categoria.
+- Tem busca por nome, profissão, empresa, cidade ou serviço, e filtros de categoria e cidade.
+- Cada cartão traz os botões **Visitar Instagram** e **Entrar em contato**. O botão de contato só aparece se a pessoa informou o WhatsApp.
+- Um cadastro novo aparece na lista na hora, sem recarregar a página.
+- A página busca a lista de novo a cada minuto e sempre que a pessoa volta para a aba.
+
+**Moderação:**
+- Por padrão, o cadastro aparece no site assim que é enviado.
+- Para tirar alguém do ar, mude o Status para **Recusado** ou **Inativo**. Some do site em até 30 segundos.
+- Para exigir aprovação antes de publicar, mude `EXIGIR_APROVACAO` para `true`. Fica no `CONFIG` do `Codigo.gs` (Google) ou no início do `servidor.py` (versão local). Com isso, só aparece quem estiver com Status **Aprovado**.
+- O mesmo Instagram não pode ser cadastrado duas vezes.
+
+**Depois de mudar o `Codigo.gs`**, publique a nova versão: **Implantar → Gerenciar implantações → lápis → Versão: Nova versão → Implantar**. A URL continua a mesma.
+
 ## A planilha (as duas formas usam as mesmas colunas)
 
 - **Status:** chega como **Novo**. Mude para Aprovado, Recusado ou Inativo pela lista suspensa.
