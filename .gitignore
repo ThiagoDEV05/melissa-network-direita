@@ -1,0 +1,8 @@
+# Cadastros das pessoas: ficam só no computador
+dados/
+
+# Sistema
+.DS_Store
+__pycache__/
+*.pyc
+*.tmp.xlsx

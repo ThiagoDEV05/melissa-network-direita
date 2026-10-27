@@ -1,0 +1,467 @@
+<title>Networking da Direita</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cadastro de profissionais e empreendedores do Networking da Direita.">
+<meta name="theme-color" content="#03110B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: celular = bandeira no topo, título e formulário em coluna; computador = bandeira e título à esquerda, formulário fixo à direita.
+   Visual escuro e tecnológico por escolha (tema único): fundo verde-noite, brilhos em verde, amarelo e azul. */
+:root {
+  --bg: #03110B;
+  --bg-2: #071D14;
+  --panel: rgba(9, 30, 21, 0.72);
+  --field: rgba(255, 255, 255, 0.045);
+  --line: rgba(220, 255, 235, 0.12);
+  --fg: #EAF4EE;
+  --muted: #9AB4A6;
+  --green: #18B566;
+  --green-2: #0B7A42;
+  --gold: #F7CB3C;
+  --blue: #3D6EE0;
+  --danger: #FF8A80;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh; background: var(--bg); color: var(--fg);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.55; overflow-x: hidden;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+::selection { background: var(--gold); color: #10221A; }
+
+/* Fundo: grade de pontos + brilhos que se movem devagar */
+.fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.fx .grid {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(220,255,235,.09) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 30%, transparent 75%);
+          mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 30%, transparent 75%);
+}
+.fx .orb { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .5; animation: drift 18s ease-in-out infinite alternate; }
+.fx .o1 { width: 46vmax; height: 46vmax; left: -14vmax; top: -16vmax; background: #0E7A44; }
+.fx .o2 { width: 34vmax; height: 34vmax; right: -12vmax; top: 18vh; background: #1B3F9E; opacity: .38; animation-duration: 22s; }
+.fx .o3 { width: 26vmax; height: 26vmax; left: 30vw; bottom: -14vmax; background: #B88A0E; opacity: .26; animation-duration: 26s; }
+.fx .scan { position: absolute; left: 0; right: 0; height: 160px; top: -160px; background: linear-gradient(transparent, rgba(24,181,102,.06), transparent); animation: scan 9s linear infinite; }
+@keyframes drift { to { transform: translate(6vmax, 5vmax) scale(1.08); } }
+@keyframes scan { to { transform: translateY(calc(100vh + 160px)); } }
+
+.page {
+  position: relative; z-index: 1; max-width: 1180px; margin: 0 auto;
+  padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+  display: grid; gap: 28px;
+}
+@media (min-width: 960px) {
+  .page { grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 56px; align-items: start; padding-block: 48px 64px; }
+  .hero { position: sticky; top: 48px; }
+}
+
+/* Abertura */
+.hero { display: grid; gap: 18px; min-width: 0; }
+.flag-wrap { position: relative; width: min(100%, 520px); }
+.flag-wrap::after { content: ""; position: absolute; inset: 18% 8% -4% 8%; background: radial-gradient(ellipse at center, rgba(24,181,102,.35), transparent 70%); filter: blur(28px); z-index: -1; }
+#bandeira { display: block; width: 100%; height: auto; aspect-ratio: 520 / 400; max-width: 100%; }
+.tag { display: inline-flex; align-items: center; gap: 8px; width: fit-content; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.03); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.tag .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(24,181,102,.6); animation: pulse 2s infinite; }
+@keyframes pulse { 70% { box-shadow: 0 0 0 10px rgba(24,181,102,0); } 100% { box-shadow: 0 0 0 0 rgba(24,181,102,0); } }
+h1 {
+  margin: 0; font-family: var(--f-display); font-stretch: 122%; font-weight: 900; text-transform: uppercase;
+  font-size: clamp(2.2rem, 9vw, 4.4rem); line-height: 0.92; letter-spacing: -0.01em; text-wrap: balance;
+  background: linear-gradient(100deg, #FFFFFF 0%, #DFF5E8 45%, var(--gold) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+@media (min-width: 960px) { h1 { font-size: clamp(2.6rem, 4.4vw, 4.2rem); } }
+.sub { margin: 0; font-family: var(--f-display); font-stretch: 110%; font-weight: 600; font-size: 1.05rem; color: var(--gold); }
+.msg { margin: 0; max-width: 46ch; color: var(--muted); font-size: 1.05rem; }
+.perks { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.perks li { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid var(--line); font-size: 0.85rem; }
+.perks svg { width: 15px; height: 15px; color: var(--green); }
+
+/* Cartão do formulário com borda animada */
+.card { position: relative; border-radius: 22px; padding: 1px; min-width: 0; isolation: isolate; }
+.card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1;
+  background: conic-gradient(from var(--ang, 0deg), rgba(24,181,102,.9), rgba(247,203,60,.85), rgba(61,110,224,.9), rgba(24,181,102,.9));
+  animation: spin 6s linear infinite; opacity: .75;
+}
+@property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes spin { to { --ang: 360deg; } }
+.card-in { border-radius: 21px; background: linear-gradient(180deg, rgba(10,34,24,.94), rgba(5,20,14,.96)); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); padding: 22px 18px; }
+@media (min-width: 560px) { .card-in { padding: 30px 28px; } }
+.card h2 { margin: 0; font-family: var(--f-display); font-stretch: 112%; font-weight: 800; font-size: 1.4rem; line-height: 1.2; }
+.card .lead { margin: 6px 0 0; color: var(--muted); font-size: 0.92rem; }
+
+.prog { margin: 18px 0 22px; }
+.prog-top { display: flex; justify-content: space-between; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+.prog-top b { color: var(--fg); }
+.bar { margin-top: 8px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.07); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--gold), var(--blue)); background-size: 200% 100%; box-shadow: 0 0 14px rgba(24,181,102,.6); transition: width .45s cubic-bezier(.2,.8,.2,1); animation: flow 3s linear infinite; }
+@keyframes flow { to { background-position: -200% 0; } }
+
+form { display: grid; gap: 14px; }
+@media (min-width: 560px) { form { grid-template-columns: 1fr 1fr; } .full { grid-column: 1 / -1; } }
+.fld { display: grid; gap: 6px; min-width: 0; }
+.fld > label, .lbl { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.fld .opt { font-weight: 500; letter-spacing: 0; text-transform: none; opacity: .8; }
+.in, select, textarea {
+  width: 100%; min-height: 50px; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--field); color: var(--fg);
+  font: 500 1rem var(--f-body); transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.in::placeholder, textarea::placeholder { color: rgba(154,180,166,.55); }
+.in:focus, select:focus, textarea:focus { outline: 0; border-color: var(--green); background: rgba(24,181,102,.06); box-shadow: 0 0 0 4px rgba(24,181,102,.14), 0 0 24px rgba(24,181,102,.18); }
+select { appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 20px) 22px, calc(100% - 15px) 22px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 40px; }
+select option { background: var(--bg-2); color: var(--fg); }
+textarea { min-height: 104px; resize: vertical; line-height: 1.45; }
+.at { position: relative; }
+.at span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; pointer-events: none; }
+.at .in { padding-left: 32px; }
+.hint { font-size: 0.78rem; color: var(--muted); }
+.hint.r { text-align: right; font-variant-numeric: tabular-nums; }
+.fld.err .in, .fld.err select, .fld.err textarea { border-color: var(--danger); }
+
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pills label { position: relative; }
+.pills input { position: absolute; inset: 0; opacity: 0; }
+.pills span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--field); font-weight: 600; font-size: 0.92rem; cursor: pointer; transition: all .2s; }
+.pills input:checked + span { background: var(--green); border-color: var(--green); color: #04150C; box-shadow: 0 0 18px rgba(24,181,102,.45); }
+.pills input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.check { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); font-size: 0.88rem; color: #CFE0D6; cursor: pointer; }
+.check input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--green); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.send {
+  position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; min-height: 56px; border: 0; border-radius: 14px; cursor: pointer;
+  background: linear-gradient(100deg, var(--green-2), var(--green)); color: #FFFFFF;
+  font: 800 1rem var(--f-display); font-stretch: 112%; letter-spacing: 0.06em; text-transform: uppercase;
+  box-shadow: 0 10px 30px rgba(24,181,102,.28); transition: transform .15s, box-shadow .2s;
+}
+.send::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent); transform: skewX(-18deg); animation: shine 3.2s ease-in-out infinite; }
+@keyframes shine { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+.send:hover { box-shadow: 0 12px 38px rgba(24,181,102,.42); }
+.send:active { transform: scale(.985); }
+.send:disabled { opacity: .7; cursor: wait; }
+.send svg { width: 20px; height: 20px; }
+.spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.35); border-top-color: #fff; animation: rot .7s linear infinite; }
+@keyframes rot { to { transform: rotate(360deg); } }
+.erro { min-height: 1.2em; margin: 0; color: var(--danger); font-size: 0.9rem; font-weight: 600; text-align: center; }
+
+/* Sucesso */
+.ok { display: grid; justify-items: center; text-align: center; gap: 14px; padding: 18px 4px 6px; }
+.ok svg.tick { width: 92px; height: 92px; }
+.ok .c { stroke: var(--green); stroke-width: 3; fill: rgba(24,181,102,.1); stroke-dasharray: 280; stroke-dashoffset: 280; animation: draw .7s ease-out forwards; }
+.ok .t { stroke: var(--gold); stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 70; stroke-dashoffset: 70; animation: draw .45s .55s ease-out forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.ok h2 { font-size: 1.6rem; }
+.ok p { margin: 0; color: var(--muted); max-width: 40ch; }
+.ok .demo { font-size: 0.85rem; color: var(--gold); }
+.ghost { min-height: 48px; padding: 0 20px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); color: var(--fg); font: 600 0.95rem var(--f-body); cursor: pointer; }
+.ghost:hover { border-color: var(--green); }
+
+details.regras { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; font-size: 0.86rem; color: var(--muted); }
+details.regras summary { cursor: pointer; font-weight: 600; color: var(--fg); list-style: none; display: flex; align-items: center; gap: 8px; }
+details.regras summary::-webkit-details-marker { display: none; }
+details.regras summary::before { content: "+"; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line); font-weight: 700; color: var(--gold); }
+details.regras[open] summary::before { content: "–"; }
+details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6px; }
+
+#confete { position: fixed; inset: 0; z-index: 50; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+<!--/HEAD-->
+
+<div class="fx" aria-hidden="true"><div class="grid"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="scan"></div></div>
+
+<main class="page">
+  <section class="hero" aria-labelledby="titulo">
+    <div class="flag-wrap"><canvas id="bandeira" width="520" height="400" role="img" aria-label="Bandeira do Brasil tremulando"></canvas></div>
+    <span class="tag"><span class="pulse"></span>Cadastro aberto</span>
+    <h1 id="titulo">Networking da Direita</h1>
+    <p class="sub">Guia de profissionais e empreendedores</p>
+    <p class="msg">Encontre profissionais, conheça novos negócios, fortaleça conexões e faça parte de uma rede de empreendedores que crescem juntos.</p>
+    <ul class="perks">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Gratuito</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Leva 2 minutos</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Seu Instagram no guia</li>
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="tForm">
+    <div class="card-in" id="painel">
+      <h2 id="tForm">Cadastre seu negócio</h2>
+      <p class="lead">Preencha seus dados comerciais. A administração revisa antes de publicar no guia.</p>
+
+      <div class="prog" aria-hidden="true">
+        <div class="prog-top"><span>Seu cadastro</span><b id="pct">0%</b></div>
+        <div class="bar"><i id="barra"></i></div>
+      </div>
+
+      <form id="form" novalidate>
+        <div class="fld full"><label for="nome">Nome completo</label><input class="in" id="nome" name="nome" required maxlength="80" autocomplete="name" placeholder="Como você quer aparecer no guia"></div>
+        <div class="fld"><label for="empresa">Empresa <span class="opt">(se houver)</span></label><input class="in" id="empresa" name="empresa" maxlength="80" autocomplete="organization" placeholder="Nome comercial"></div>
+        <div class="fld"><label for="profissao">Profissão</label><input class="in" id="profissao" name="profissao" required maxlength="60" placeholder="Ex.: Advogada, Contador"></div>
+        <div class="fld"><label for="categoria">Categoria</label>
+          <select id="categoria" name="categoria" required>
+            <option value="">Escolha a área</option>
+            <option>Marketing e Comunicação</option>
+            <option>Advocacia e Jurídico</option>
+            <option>Saúde e Bem-estar</option>
+            <option>Beleza e Estética</option>
+            <option>Contabilidade e Finanças</option>
+            <option>Tecnologia e Informática</option>
+            <option>Vendas e Comércio</option>
+            <option>Empreendedorismo e Consultoria</option>
+            <option>Imóveis e Construção</option>
+            <option>Educação e Cursos</option>
+            <option>Alimentação e Gastronomia</option>
+            <option>Prestadores de Serviços</option>
+            <option>Outros Profissionais</option>
+          </select>
+        </div>
+        <div class="fld"><label for="especialidade">Especialidade <span class="opt">(opcional)</span></label><input class="in" id="especialidade" name="especialidade" maxlength="60" placeholder="Ex.: Direito trabalhista"></div>
+        <div class="fld"><label for="cidade">Cidade e estado</label><input class="in" id="cidade" name="cidade" required maxlength="60" autocomplete="address-level2" placeholder="Ex.: Goiânia/GO"></div>
+        <div class="fld"><label for="instagram">Instagram</label><div class="at"><span>@</span><input class="in" id="instagram" name="instagram" required maxlength="60" placeholder="seuperfil" autocapitalize="off" autocorrect="off" spellcheck="false"></div></div>
+        <div class="fld"><label for="whatsapp">WhatsApp <span class="opt">(opcional)</span></label><input class="in" id="whatsapp" name="whatsapp" type="tel" inputmode="numeric" maxlength="16" autocomplete="tel" placeholder="(00) 90000-0000"></div>
+        <div class="fld full"><label for="descricao">Descrição dos serviços</label><textarea id="descricao" name="descricao" required maxlength="280" placeholder="Em uma ou duas frases: o que você faz e para quem"></textarea><span class="hint r" id="nDesc">0/280</span></div>
+        <div class="fld full"><span class="lbl" id="lParc">Interesse em parcerias</span>
+          <div class="pills" role="radiogroup" aria-labelledby="lParc">
+            <label><input type="radio" name="parcerias" value="Sim" required><span>Sim</span></label>
+            <label><input type="radio" name="parcerias" value="A combinar"><span>A combinar</span></label>
+            <label><input type="radio" name="parcerias" value="Não"><span>Não</span></label>
+          </div>
+        </div>
+        <label class="check full" for="autorizacao"><input type="checkbox" id="autorizacao" name="autorizacao" required><span>Autorizo a divulgação, no guia do Networking da Direita, dos dados comerciais que informei aqui.</span></label>
+        <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="full" style="display:grid;gap:10px">
+          <button class="send" type="submit" id="enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>Enviar cadastro</button>
+          <p class="erro" id="erro" role="alert"></p>
+        </div>
+      </form>
+
+      <details class="regras">
+        <summary>Regras do guia</summary>
+        <ul>
+          <li>Os dados comerciais são fornecidos voluntariamente por você.</li>
+          <li>Cada participante é responsável pela exatidão das informações.</li>
+          <li>Os links são revisados periodicamente.</li>
+          <li>Estar no guia não é garantia de qualidade nem recomendação da administração.</li>
+          <li>Seus contatos só são divulgados com a sua autorização.</li>
+          <li>A administração pode corrigir ou retirar cadastros desatualizados.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+</main>
+
+<canvas id="confete" hidden></canvas>
+
+<script>
+/* Endereço do servidor local. Vazio = modo demonstração (não envia nada). */
+const API_URL = "";
+
+const calmo = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Bandeira do Brasil tremulando ---------- */
+(function bandeira() {
+  const cv = document.getElementById("bandeira");
+  const ctx = cv.getContext("2d");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const CW = 520, CH = 400, FW = 440, FH = 308, PX = 40, PY = 46;
+  cv.width = CW * dpr; cv.height = CH * dpr;
+  ctx.scale(dpr, dpr);
+
+  const off = document.createElement("canvas");
+  off.width = FW * dpr; off.height = FH * dpr;
+  const o = off.getContext("2d");
+  o.scale(dpr, dpr);
+  const u = FW / 20, cx = FW / 2, cy = FH / 2;
+
+  o.fillStyle = "#009C3B"; o.fillRect(0, 0, FW, FH);
+  o.fillStyle = "#FFDF00";
+  o.beginPath(); o.moveTo(1.7 * u, cy); o.lineTo(cx, 1.7 * u); o.lineTo(FW - 1.7 * u, cy); o.lineTo(cx, FH - 1.7 * u); o.closePath(); o.fill();
+  const r = 3.5 * u;
+  o.fillStyle = "#002776"; o.beginPath(); o.arc(cx, cy, r, 0, Math.PI * 2); o.fill();
+
+  o.save();
+  o.beginPath(); o.arc(cx, cy, r, 0, Math.PI * 2); o.clip();
+  const ax = cx + 2 * u, ay = cy + 8.6 * u, rIn = 8 * u, rOut = 8.5 * u;
+  o.fillStyle = "#FFFFFF";
+  o.beginPath(); o.arc(ax, ay, rOut, 0, Math.PI * 2); o.arc(ax, ay, rIn, 0, Math.PI * 2, true); o.fill("evenodd");
+
+  function estrela(x, y, s) {
+    o.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? s * 0.42 : s;
+      o.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    }
+    o.closePath(); o.fill();
+  }
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let n = 0, tent = 0; n < 26 && tent < 600; tent++) {
+    const x = cx + (rnd() * 2 - 1) * r, y = cy + (rnd() * 2 - 1) * r;
+    const dc = Math.hypot(x - cx, y - cy), da = Math.hypot(x - ax, y - ay);
+    if (dc > r - 0.35 * u || da < rIn + 0.3 * u) continue;
+    estrela(x, y, (0.1 + rnd() * 0.17) * u); n++;
+  }
+  estrela(cx + 1.2 * u, cy - 0.9 * u, 0.2 * u);
+
+  const texto = "ORDEM E PROGRESSO", R = (rIn + rOut) / 2;
+  o.fillStyle = "#009C3B";
+  o.font = `700 ${0.36 * u}px "Archivo", Arial, sans-serif`;
+  o.textAlign = "center"; o.textBaseline = "middle";
+  const larguras = [...texto].map(ch => o.measureText(ch).width + 0.04 * u);
+  const total = larguras.reduce((a, b) => a + b, 0);
+  let ang = Math.atan2(cy - ay, cx - ax) - total / R / 2;
+  [...texto].forEach((ch, i) => {
+    const a = ang + larguras[i] / R / 2;
+    o.save(); o.translate(ax + Math.cos(a) * R, ay + Math.sin(a) * R); o.rotate(a + Math.PI / 2); o.fillText(ch, 0, 0); o.restore();
+    ang += larguras[i] / R;
+  });
+  o.restore();
+
+  const FAIXA = 2;
+  function quadro(t) {
+    ctx.clearRect(0, 0, CW, CH);
+    for (let x = 0; x < FW; x += FAIXA) {
+      const k = x / FW;
+      const fase = x * 0.021 - t * 0.0034;
+      const onda = Math.sin(fase) + 0.35 * Math.sin(fase * 0.55 + t * 0.0011);
+      const dy = onda * 13 * (0.12 + k);
+      const sombra = Math.cos(fase) * (0.15 + k);
+      ctx.drawImage(off, x * dpr, 0, FAIXA * dpr, FH * dpr, PX + x, PY + dy, FAIXA + 0.6, FH);
+      ctx.fillStyle = sombra > 0 ? `rgba(255,255,255,${sombra * 0.16})` : `rgba(0,10,5,${-sombra * 0.3})`;
+      ctx.fillRect(PX + x, PY + dy, FAIXA + 0.6, FH);
+    }
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    ctx.fillRect(PX - 6, PY - 26, 4, FH + 70);
+  }
+
+  let visivel = true;
+  if ("IntersectionObserver" in window) new IntersectionObserver(e => { visivel = e[0].isIntersecting; }).observe(cv);
+  function loop(t) { if (visivel && !document.hidden) quadro(t); requestAnimationFrame(loop); }
+  const iniciar = () => { if (calmo) quadro(0); else requestAnimationFrame(loop); };
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(iniciar, iniciar);
+})();
+
+/* ---------- Formulário ---------- */
+const form = document.getElementById("form");
+const $ = id => document.getElementById(id);
+const obrig = ["nome", "profissao", "categoria", "cidade", "instagram", "descricao"];
+
+function progresso() {
+  let ok = obrig.filter(id => $(id).value.trim()).length;
+  if (form.querySelector("input[name=parcerias]:checked")) ok++;
+  if ($("autorizacao").checked) ok++;
+  const p = Math.round(ok / (obrig.length + 2) * 100);
+  $("pct").textContent = p + "%";
+  $("barra").style.width = p + "%";
+}
+form.addEventListener("input", progresso);
+form.addEventListener("change", progresso);
+
+$("descricao").addEventListener("input", e => { $("nDesc").textContent = e.target.value.length + "/280"; });
+$("instagram").addEventListener("input", e => {
+  const v = e.target.value.trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").split(/[/?#]/)[0];
+  if (v !== e.target.value) e.target.value = v;
+});
+$("whatsapp").addEventListener("input", e => {
+  const d = e.target.value.replace(/\D/g, "").slice(0, 11);
+  let f = d;
+  if (d.length > 2) f = `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length > 7) f = `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}`;
+  e.target.value = f;
+});
+
+function marcarErros() {
+  let primeiro = null;
+  form.querySelectorAll(".fld").forEach(f => f.classList.remove("err"));
+  obrig.forEach(id => {
+    if (!$(id).value.trim()) { $(id).closest(".fld").classList.add("err"); primeiro = primeiro || $(id); }
+  });
+  return primeiro;
+}
+
+async function enviar(dados) {
+  if (!API_URL) { await new Promise(r => setTimeout(r, 900)); return { ok: true, demo: true }; }
+  const r = await fetch(API_URL + "/cadastro", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) });
+  return r.json();
+}
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const erro = $("erro"); erro.textContent = "";
+  const falta = marcarErros();
+  if (falta) { erro.textContent = "Preencha os campos destacados."; falta.focus(); return; }
+  if (!/^[a-zA-Z0-9._]{1,30}$/.test($("instagram").value.trim())) { erro.textContent = "Confira o Instagram: só letras, números, ponto e _."; $("instagram").focus(); return; }
+  const wa = $("whatsapp").value.replace(/\D/g, "");
+  if (wa && wa.length < 10) { erro.textContent = "Confira o WhatsApp: informe DDD e número."; $("whatsapp").focus(); return; }
+  if (!form.querySelector("input[name=parcerias]:checked")) { erro.textContent = "Diga se tem interesse em parcerias."; return; }
+  if (!$("autorizacao").checked) { erro.textContent = "Marque a autorização para divulgar seus dados no guia."; $("autorizacao").focus(); return; }
+
+  const dados = {};
+  new FormData(form).forEach((v, k) => { dados[k] = String(v).trim(); });
+  dados.autorizacao = true;
+  dados.whatsapp = wa;
+
+  const btn = $("enviar"), html = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Enviando';
+  try {
+    const r = await enviar(dados);
+    if (!r.ok) throw new Error(r.erro || "Falha no envio");
+    sucesso(dados.nome, r.demo);
+  } catch (err) {
+    erro.textContent = err.message && err.message !== "Failed to fetch" ? err.message : "Não foi possível enviar. Verifique a conexão e tente de novo.";
+    btn.disabled = false; btn.innerHTML = html;
+  }
+});
+
+function sucesso(nome, demo) {
+  const primeiro = String(nome).split(/\s+/)[0];
+  $("painel").innerHTML = `<div class="ok">
+    <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><circle class="c" cx="50" cy="50" r="44"/><path class="t" d="M30 52 45 66 71 38"/></svg>
+    <h2>Cadastro enviado, ${primeiro.replace(/[<>&"]/g, "")}!</h2>
+    <p>Recebemos seus dados. A administração vai revisar e, depois da aprovação, seu perfil entra no guia do Networking da Direita.</p>
+    ${demo ? '<p class="demo">Modo demonstração: nada foi gravado.</p>' : ""}
+    <button class="ghost" type="button" onclick="location.reload()">Fazer outro cadastro</button>
+  </div>`;
+  $("painel").scrollIntoView({ behavior: calmo ? "auto" : "smooth", block: "center" });
+  if (!calmo) confete();
+}
+
+/* ---------- Confete verde, amarelo, azul e branco ---------- */
+function confete() {
+  const cv = $("confete"), c = cv.getContext("2d");
+  cv.hidden = false; cv.width = innerWidth; cv.height = innerHeight;
+  const cores = ["#009C3B", "#FFDF00", "#002776", "#FFFFFF", "#18B566"];
+  const ps = Array.from({ length: 160 }, () => ({
+    x: innerWidth / 2 + (Math.random() - .5) * 120, y: innerHeight * .45,
+    vx: (Math.random() - .5) * 14, vy: -Math.random() * 15 - 5,
+    w: 6 + Math.random() * 6, h: 3 + Math.random() * 4,
+    a: Math.random() * 6.28, va: (Math.random() - .5) * .3, cor: cores[(Math.random() * cores.length) | 0]
+  }));
+  const t0 = performance.now();
+  (function passo(t) {
+    c.clearRect(0, 0, cv.width, cv.height);
+    ps.forEach(p => {
+      p.vy += .38; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      c.save(); c.translate(p.x, p.y); c.rotate(p.a); c.fillStyle = p.cor; c.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); c.restore();
+    });
+    if (t - t0 < 3200) requestAnimationFrame(passo); else { c.clearRect(0, 0, cv.width, cv.height); cv.hidden = true; }
+  })(t0);
+}
+
+progresso();
+</script>
