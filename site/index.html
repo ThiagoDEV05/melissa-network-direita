@@ -269,6 +269,7 @@ details.regras ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6p
 
 <canvas id="confete" hidden></canvas>
 
+<script src="config.js"></script>
 <script>
 /* Endereço do servidor local. Vazio = modo demonstração (não envia nada). */
 const API_URL = "/api";
@@ -397,8 +398,11 @@ function marcarErros() {
 }
 
 async function enviar(dados) {
-  if (!API_URL) { await new Promise(r => setTimeout(r, 900)); return { ok: true, demo: true }; }
-  const r = await fetch(API_URL + "/cadastro", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) });
+  const planilha = window.PLANILHA_URL;
+  if (!planilha && !API_URL) { await new Promise(r => setTimeout(r, 900)); return { ok: true, demo: true }; }
+  const r = planilha
+    ? await fetch(planilha, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(dados) })
+    : await fetch(API_URL + "/cadastro", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) });
   let j = null;
   try { j = await r.json(); } catch (e) {}
   if (!j) throw new Error("O formulário está sem conexão com a planilha de cadastros. Avise a administração.");

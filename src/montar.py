@@ -12,6 +12,8 @@ head = re.sub(r'<link rel="preconnect"[^>]*>\n', "", head)
 head = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^"]*">',
               '<link rel="stylesheet" href="vendor/fonts.css">', head)
 body = body.replace('const API_URL = "";', 'const API_URL = "/api";')
+body = body.replace("<script>\n/* Endereço", '<script src="config.js"></script>\n<script>\n/* Endereço', 1)
+assert 'src="config.js"' in body, "não achei onde incluir o config.js"
 
 html = ('<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
